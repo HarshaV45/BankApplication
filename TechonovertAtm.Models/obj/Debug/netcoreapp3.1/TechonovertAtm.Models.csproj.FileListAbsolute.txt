@@ -1,0 +1,10 @@
+C:\Users\91799\source\repos\TechonovertAtm.Models\bin\Debug\netcoreapp3.1\TechonovertAtm.Models.deps.json
+C:\Users\91799\source\repos\TechonovertAtm.Models\bin\Debug\netcoreapp3.1\TechonovertAtm.Models.dll
+C:\Users\91799\source\repos\TechonovertAtm.Models\bin\Debug\netcoreapp3.1\TechonovertAtm.Models.pdb
+C:\Users\91799\source\repos\TechonovertAtm.Models\obj\Debug\netcoreapp3.1\TechonovertAtm.Models.csproj.AssemblyReference.cache
+C:\Users\91799\source\repos\TechonovertAtm.Models\obj\Debug\netcoreapp3.1\TechonovertAtm.Models.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\91799\source\repos\TechonovertAtm.Models\obj\Debug\netcoreapp3.1\TechonovertAtm.Models.AssemblyInfoInputs.cache
+C:\Users\91799\source\repos\TechonovertAtm.Models\obj\Debug\netcoreapp3.1\TechonovertAtm.Models.AssemblyInfo.cs
+C:\Users\91799\source\repos\TechonovertAtm.Models\obj\Debug\netcoreapp3.1\TechonovertAtm.Models.csproj.CoreCompileInputs.cache
+C:\Users\91799\source\repos\TechonovertAtm.Models\obj\Debug\netcoreapp3.1\TechonovertAtm.Models.dll
+C:\Users\91799\source\repos\TechonovertAtm.Models\obj\Debug\netcoreapp3.1\TechonovertAtm.Models.pdb

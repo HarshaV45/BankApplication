@@ -1,0 +1,13 @@
+C:\Users\91799\source\repos\TechnovertAtm.Services\bin\Debug\netcoreapp3.1\TechnovertAtm.Services.deps.json
+C:\Users\91799\source\repos\TechnovertAtm.Services\bin\Debug\netcoreapp3.1\TechnovertAtm.Services.dll
+C:\Users\91799\source\repos\TechnovertAtm.Services\bin\Debug\netcoreapp3.1\TechnovertAtm.Services.pdb
+C:\Users\91799\source\repos\TechnovertAtm.Services\bin\Debug\netcoreapp3.1\TechonovertAtm.Models.dll
+C:\Users\91799\source\repos\TechnovertAtm.Services\bin\Debug\netcoreapp3.1\TechonovertAtm.Models.pdb
+C:\Users\91799\source\repos\TechnovertAtm.Services\obj\Debug\netcoreapp3.1\TechnovertAtm.Services.csproj.AssemblyReference.cache
+C:\Users\91799\source\repos\TechnovertAtm.Services\obj\Debug\netcoreapp3.1\TechnovertAtm.Services.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\91799\source\repos\TechnovertAtm.Services\obj\Debug\netcoreapp3.1\TechnovertAtm.Services.AssemblyInfoInputs.cache
+C:\Users\91799\source\repos\TechnovertAtm.Services\obj\Debug\netcoreapp3.1\TechnovertAtm.Services.AssemblyInfo.cs
+C:\Users\91799\source\repos\TechnovertAtm.Services\obj\Debug\netcoreapp3.1\TechnovertAtm.Services.csproj.CoreCompileInputs.cache
+C:\Users\91799\source\repos\TechnovertAtm.Services\obj\Debug\netcoreapp3.1\TechnovertAtm.Services.csproj.CopyComplete
+C:\Users\91799\source\repos\TechnovertAtm.Services\obj\Debug\netcoreapp3.1\TechnovertAtm.Services.dll
+C:\Users\91799\source\repos\TechnovertAtm.Services\obj\Debug\netcoreapp3.1\TechnovertAtm.Services.pdb

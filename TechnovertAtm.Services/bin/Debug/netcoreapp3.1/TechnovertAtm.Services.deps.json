@@ -1,0 +1,36 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v3.1",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v3.1": {
+      "TechnovertAtm.Services/1.0.0": {
+        "dependencies": {
+          "TechonovertAtm.Models": "1.0.0"
+        },
+        "runtime": {
+          "TechnovertAtm.Services.dll": {}
+        }
+      },
+      "TechonovertAtm.Models/1.0.0": {
+        "runtime": {
+          "TechonovertAtm.Models.dll": {}
+        }
+      }
+    }
+  },
+  "libraries": {
+    "TechnovertAtm.Services/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "TechonovertAtm.Models/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    }
+  }
+}
