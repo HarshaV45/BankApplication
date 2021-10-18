@@ -4,9 +4,9 @@ using System.Text;
 
 namespace TechonovertAtm.Models
 {
-     public enum TransactionType
+    public enum AccountStatus
     {
-        Credit,
-        Debit
+        Active,
+        Inactive
     }
 }

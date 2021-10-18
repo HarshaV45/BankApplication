@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using TechnovertAtm.Services;
+using TechonovertAtm.Models;
 
 namespace TechnovertAtm.CLI
 {
@@ -30,12 +31,15 @@ namespace TechnovertAtm.CLI
         static void Main(string[] args)
         {
             BankService bankService = new BankService(); //creating a instance for service class
-            List<string> LoginOptions = new List<string>() { "1.Login", "2.Exit" };
-            Console.WriteLine("Welcome to xyz Bank");
+            List<string> LoginOptions = new List<string>() { "1.Create Bank Account", "2.Login to Account", "3.Exit" };
+            Console.WriteLine("\nWelcome to XYZ bank ");
            
 
             int LoginOption = 0;       
             int ServiceOption = 0;
+            string accountNumber = "";
+            string bankName = "";
+            string password = "";
             do
             {
                 foreach (var d in LoginOptions)
@@ -49,22 +53,27 @@ namespace TechnovertAtm.CLI
                 {
                     case "1":
                         Console.WriteLine("");
+                        Console.WriteLine("Enter Bank Name");
+                         bankName = Console.ReadLine();
                         Console.Write("Enter Account Number: ");
-                        int cardNo = Convert.ToInt32(Console.ReadLine());
-                        Console.Write("Enter 6 digits pin: ");
-                        int pin = Convert.ToInt32(Console.ReadLine());
+                        accountNumber = Console.ReadLine();
+                        Console.Write("Enter Your Account Password: ");
+                        password = (Console.ReadLine());
+                        bankService.BankCreation(bankName);
+                        bankService.AccountCreation(bankName, accountNumber, password);
+                        Console.WriteLine("Account Sucessfully Created");
+                        break;
 
-                        if (bankService.validateCardDetails(cardNo, pin) == false)//using the same instance for all methods
-                        {
-                            Console.WriteLine("These Details are not present in the Bank");
-                            Console.WriteLine("Would you like to Create a new Account using these details: Yes/No");
-                            string newAccountOption = Console.ReadLine();
-                            if (newAccountOption.ToLower() == "yes")
-                            {
-                                bankService.AddAccount(cardNo, pin);
-                            }
-                        }
-                        else
+                    case "2":
+                        Console.WriteLine("Enter Bank Name");
+                          bankName = Console.ReadLine();
+                        Console.Write("Enter Account Number: ");
+                          accountNumber = Console.ReadLine();
+                        Console.Write("Enter Your Account Password: ");
+                          password = (Console.ReadLine());
+
+                        if (bankService.IsBankPresent(bankName) && bankService.IsAccountPresent(bankName, accountNumber, password))
+                        
                         {
                             do
                             {
@@ -77,7 +86,7 @@ namespace TechnovertAtm.CLI
                                         int deposit_amount = 0;
                                         Console.Write("Enter the amount to deposit : rs ");
                                         deposit_amount = Convert.ToInt32(Console.ReadLine());
-                                        if (bankService.deposit(cardNo, deposit_amount))
+                                        if (bankService.Deposit(bankName,accountNumber, deposit_amount))
                                         {
                                             Console.WriteLine("Amount sucessfully deposited to your Account");
                                         }
@@ -90,7 +99,7 @@ namespace TechnovertAtm.CLI
                                         int withdraw_amount = 0;
                                         Console.Write("Enter amount to withdraw: rs ");
                                         withdraw_amount = Convert.ToInt32(Console.ReadLine());
-                                        if (bankService.withdraw(cardNo, withdraw_amount))
+                                        if (bankService.Withdraw(bankName,accountNumber, withdraw_amount))
                                         {
                                             Console.WriteLine("Amount sucessfully withdrawn , Please collect your money ");
                                         }
@@ -100,22 +109,30 @@ namespace TechnovertAtm.CLI
                                         }
                                         break;
                                     case 3:
-                                        List<string> log = bankService.TransactionLog(cardNo);
-                                        foreach (var d in log)
+                                        
+                                        List<Transactions>Transactions= bankService.TransactionLog(bankName, accountNumber);
+                                        foreach (var d in Transactions)
                                         {
-                                            Console.WriteLine(d);
+                                            Console.WriteLine(d.Id + " " + d.Type + " " + d.Amount+" "+ d.On);
                                         }
                                         break;
+
+                                        
                                     case 4:
-                                        Console.WriteLine("Enter account number");
-                                        int accnum = Convert.ToInt32(Console.ReadLine());
-                                        Console.WriteLine("enter account number to be transferred");
-                                        int accnum1 = Convert.ToInt32(Console.ReadLine());
+                                        //Console.WriteLine("Enter Your Bank Name : ");
+                                        //string SourceBankName = Console.ReadLine();
+                                        //Console.WriteLine("enter Your account Number : ");
+                                        //string SourceAccountNumber = Console.ReadLine();
                                         Console.WriteLine("Enter the amount of money to be transferred : ");
                                         int transfered_money = Convert.ToInt32(Console.ReadLine());
-                                        if (bankService.transfer(accnum, accnum1, transfered_money))
+                                        Console.WriteLine("Enter Destination Bank Name : ");
+                                        string DestinationBankName = Console.ReadLine();
+                                        Console.WriteLine("enter Destination Account Number  : ");
+                                        string DestinationAccountNumber = Console.ReadLine();
+
+                                        if (bankService.Transfer(bankName,accountNumber,transfered_money,DestinationBankName,DestinationAccountNumber))
                                         {
-                                            Console.WriteLine("Amount sucessfully transferred");
+                                            Console.WriteLine("------ Amount sucessfully transferred -------");
                                         }
                                         else
                                         {
@@ -131,9 +148,13 @@ namespace TechnovertAtm.CLI
                                 }
                             } while (ServiceOption != 5);
                         }
+                        else
+                        {
+                            Console.WriteLine("Invalid Details ,Please enter details Correctly  ");
+                        }
 
                         break;
-                    case "2":
+                    case "3":
                         break;
 
                     default:
@@ -141,7 +162,7 @@ namespace TechnovertAtm.CLI
                         break;
 
                 }
-            } while (LoginOption != 2);
+            } while (LoginOption != 3);
             Console.WriteLine("Thanks for using xyz bank");
 
         }

@@ -4,7 +4,13 @@ using System.Text;
 
 namespace TechonovertAtm.Models
 {
-    class Banks
+    public class Banks
     {
+        public string Id { get; set; }
+        public string Name { get; set; }
+
+        public List<BankAccounts> BankAccounts { get; set; }
+
+
     }
 }

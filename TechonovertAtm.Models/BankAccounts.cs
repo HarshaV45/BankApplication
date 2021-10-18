@@ -7,10 +7,16 @@ namespace TechonovertAtm.Models
 {
     public class BankAccounts
     {
+        public string Id { get; set; }
         public int AccountNumber { get; set; }
-        public int Pin { get; set; }
-        public int Amount { get; set; }
-        public List<string> Transactions { get; set; }
+        public string Password { get; set; }
+        public decimal Amount { get; set; }
+        public List<Transactions> Transactions { get; set; }
+        public string Name { get; set; }
+        public bool IsMale { get; set; }
+        public AccountStatus Status { get; set; }
+        
+
        
     }
 }

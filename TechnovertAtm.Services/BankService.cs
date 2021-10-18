@@ -7,29 +7,44 @@ namespace TechnovertAtm.Services
 {
     public class BankService
     {
-        private List<BankAccounts> accounts; //can be accsesible only this class
-        
-        public BankService() //constructor 
+        private List<Banks> banks; 
+        DateTime PresentDate = DateTime.Today;
+        public BankService() 
         {
-            accounts = new List<BankAccounts>();
-            BankAccounts account = new BankAccounts
-            {
-                AccountNumber = 1234567,
-                Pin = 997745,
-                Amount = 1000
-            };
-            this.accounts.Add(account);
+            this.banks = new List<Banks>();
 
-           
-            
+        }
+        public bool InputChecker(string input)
+        {
+            if(string.IsNullOrEmpty(input))
+            {
+                return false;
+            }
+            return true;
+        }
+        public string  BankIdPattern(string bankName)
+        {
+            return bankName.Substring(0, 3) + PresentDate.ToString("dd") + PresentDate.ToString("MM") + PresentDate.ToString("yyyy");
+
+        }
+        public string AccountIdPattern(string CustomerName)
+        {
+            return CustomerName.Substring(0, 3) + PresentDate.ToString("dd") + PresentDate.ToString("MM") + PresentDate.ToString("yyyy");
+        }
+
+        public string TransactionIdGenerator(string bankId,string accountId)
+        {
+            return "TXN" + bankId + accountId + PresentDate.ToString("dd") + PresentDate.ToString("MM") + PresentDate.ToString("yyyy");
         }
 
 
-        public BankAccounts IsAccountPresent(int cardNo)
+
+        public Banks BankChecker(string bankName)
         {
-            foreach(var d in accounts)
+            foreach(var d in banks)
             {
-                if(d.AccountNumber == cardNo)
+                string bankId = BankIdPattern(bankName);
+                if(d.Id == bankId)
                 {
                     return d;
                 }
@@ -37,119 +52,246 @@ namespace TechnovertAtm.Services
             return null;
         }
 
-        public void AddAccount(int accountNumber, int pin)
+        public BankAccounts AccountChecker(string bankName, string accountNumber)
         {
-            BankAccounts account = new BankAccounts
+            Banks bank = BankChecker(BankIdPattern(bankName));
+            foreach(var d in bank.BankAccounts)
             {
-                AccountNumber = accountNumber,
-                Pin = pin,
-                Amount = 1000,
-                Transactions = new List<string>()
-            };
-            this.accounts.Add(account); //added the new account number into bank
+                if(d.Id==AccountIdPattern(accountNumber))
+                {
+                    return d;
+                }
+            }
+            return null;
         }
 
 
-        public bool validateCardDetails(int cardNo, int pin)
+        public string BankCreation(string bankName)
         {
-            foreach (var d in accounts)
+            Banks newBank = new Banks()
             {
-                if (d.AccountNumber == cardNo && d.Pin == pin)
+                Name = bankName,
+                Id = BankIdPattern(bankName),
+                BankAccounts = new List<BankAccounts>()
+
+            };
+            this.banks.Add(newBank);
+            return newBank.Id;
+        }
+
+
+       
+
+
+        public void AccountCreation(string bankName, string CustomerName, string password)
+        {
+            string bankId = BankIdPattern(bankName);
+            BankAccounts account = new BankAccounts()
+            {
+                Id = AccountIdPattern(CustomerName),
+                Password = password,
+                Amount = 0,
+                Transactions = new List<Transactions>()
+            };
+            Banks bank = BankChecker(bankId);
+            bank.BankAccounts.Add(account);
+
+        }
+
+
+        public bool IsBankPresent(string bankName)
+        {
+            foreach (var d in banks)
+            {
+                if (d.Id == BankIdPattern(bankName))
                 {
                     return true;
                 }
-                
             }
             return false;
-       
-
         }
 
 
-        public bool deposit(int accountNumber, int deposit_amount)
-        {
-             
 
-            if (deposit_amount > 0)
+        public bool IsAccountPresent(string bankName, string accountNumber, string password)
+        {
+            if(InputChecker(BankIdPattern( bankName)) && InputChecker(AccountIdPattern( accountNumber)))
             {
-                BankAccounts userAccounts = IsAccountPresent(accountNumber);
-                if(userAccounts==null)
+                BankAccounts user = AccountChecker(BankIdPattern( bankName),AccountIdPattern( accountNumber));
+                if(user ==null || user.Password!=password)
                 {
                     return false;
                 }
-                userAccounts.Amount += deposit_amount;
-                userAccounts.Transactions.Add(deposit_amount + "has been deposited into Account Number"+accountNumber);
                 return true;
-                        
-                    
-                
             }
-
             return false;
-            
+        }
+         
+
+        public bool Deposit(string bankName,string accountNumber,decimal amount)
+        {
+            string bankId = BankIdPattern(bankName);
+            string accountId = AccountIdPattern(accountNumber);
+            if(InputChecker(bankId) && InputChecker(accountId))
+            {
+                BankAccounts user = AccountChecker(bankId, accountId);
+                if(user == null)
+                {
+                    return false;
+                }
+                user.Amount += amount;
+                user.Transactions.Add(new Transactions()
+                {
+                    Id = TransactionIdGenerator(bankId, accountId),
+                    Amount = amount,
+                    Type = TransactionType.Credit
+
+
+                });
+                return true;
+
+            }
+            return false;
         }
 
-        public bool withdraw(int accountNumber, int withdraw_amount)
+
+
+        public bool Withdraw(string bankName, string accountNumber, decimal amount)
         {
-            bool flag = false;
-
-            BankAccounts userAccounts = IsAccountPresent(accountNumber);
-            if (userAccounts != null)
+            string bankId = BankIdPattern(bankName);
+            string accountId = AccountIdPattern(accountNumber);
+            if (InputChecker(bankId) && InputChecker(accountId))
             {
-                if (userAccounts.Amount < withdraw_amount)
+                BankAccounts user = AccountChecker(bankId, accountId);
+                if (user == null || user.Amount<amount)
                 {
-                    flag = false;
+                    return false;
                 }
-                else
+                user.Amount -= amount;
+                user.Transactions.Add(new Transactions()
                 {
-                    flag = true;
-                    userAccounts.Amount -= withdraw_amount;
-                    userAccounts.Transactions.Add(withdraw_amount + " has been withdrawn from Account Number " + accountNumber);
+                    Id = TransactionIdGenerator(bankId, accountId),
+                    Amount = amount,
+                    Type = TransactionType.Debit
 
-                }
-                
+
+                });
+                return true;
+
             }
-            return flag;
+            return false;
         }
-   
-        public bool transfer(int accnum, int accnum1, int amount)
-        {
-            bool flag = false;
 
-            foreach (var d in accounts)
+
+
+        public bool Transfer(string sourceBankName, string sourceAccountNumber,decimal amount,string destinationBankName,string destinationAccountNumber)
+
+        {
+            string sourceBankId = BankIdPattern(sourceBankName);
+            string sourceAccountId = AccountIdPattern(sourceAccountNumber);
+            string destinationBankId = BankIdPattern(destinationBankName);
+            string destinationAccountId = AccountIdPattern(destinationAccountNumber);
+            if(InputChecker(sourceAccountId) && InputChecker(destinationAccountId)&& InputChecker(sourceBankId))
             {
-                if (d.AccountNumber == accnum)
+                BankAccounts sourceAccount = AccountChecker(sourceBankId, sourceAccountId);
+                BankAccounts destinationAccount = AccountChecker(destinationBankId, destinationAccountId);
+                if(sourceAccount==null || destinationAccount == null || sourceAccount.Amount<amount)
                 {
-                    if (d.Amount < amount)
-                    {
-                        flag = false;
-                    }
-                    else
-                    {
-                        flag = true;
-                        d.Amount -= amount;
-                    }
-                    break;
-                }
-            }
-            foreach (var d in accounts)
-            {
-                if (d.AccountNumber == accnum1)
-                {
-                    d.Amount += amount;
+                    return false;
                     
                 }
+                sourceAccount.Amount -= amount;
+                sourceAccount.Transactions.Add(new Transactions()
+                {
+                    Id = TransactionIdGenerator(sourceBankId, sourceAccountId),
+                    Amount = amount,
+                    Type = TransactionType.Debit
+
+                });
+                destinationAccount.Amount += amount;
+                destinationAccount.Transactions.Add(new Transactions()
+                {
+                    Id = TransactionIdGenerator(destinationBankId, destinationAccountId),
+                    Amount = amount,
+                    Type = TransactionType.Credit
+                });
             }
-
-            return flag;
+            return true;
         }
-        public List<string> TransactionLog(int accountNumber)
+
+
+
+        public List<Transactions> TransactionLog(string bankName,string accountNumber)
         {
-            BankAccounts userAccounts = IsAccountPresent(accountNumber);
-            return userAccounts.Transactions;
-
-
+            string bankId = BankIdPattern(bankName);
+            string accountId = AccountIdPattern(accountNumber);
+            List<Transactions> transactions = new List<Transactions>();
+            foreach(var d in banks)
+            {
+                if(d.Id==bankId)
+                {
+                    foreach(var k in d.BankAccounts)
+                    {
+                        if(k.Id == accountId)
+                        {
+                            transactions = k.Transactions;
+                        }
+                    }
+                }
+            }
+            return transactions;
         }
-        
+
+
+
+
+
+
+
+
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
