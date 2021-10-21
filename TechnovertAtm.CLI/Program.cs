@@ -30,14 +30,14 @@ namespace TechnovertAtm.CLI
 
         static void Main(string[] args)
         {
-            BankService bankService = new BankService(); //creating a instance for service class
+            BankService bankService = new BankService(); 
             List<string> LoginOptions = new List<string>() { "1.Create Bank Account", "2.Login to Account", "3.Exit" };
             Console.WriteLine("\nWelcome to XYZ bank ");
            
 
             int LoginOption = 0;       
             int ServiceOption = 0;
-            string accountNumber = "";
+            string accountName = "";
             string bankName = "";
             string password = "";
             do
@@ -46,71 +46,96 @@ namespace TechnovertAtm.CLI
                 {
                     Console.WriteLine(d);
                 }
-                Console.WriteLine("Choose an option number");
-                string ChoosedOption = Console.ReadLine();
-                LoginOption = Convert.ToInt32(ChoosedOption);
-                switch (ChoosedOption)
+                try
                 {
-                    case "1":
-                        Console.WriteLine("");
-                        Console.WriteLine("Enter Bank Name");
-                         bankName = Console.ReadLine();
-                        Console.Write("Enter Account Number: ");
-                        accountNumber = Console.ReadLine();
-                        Console.Write("Enter Your Account Password: ");
-                        password = (Console.ReadLine());
-                        bankService.BankCreation(bankName);
-                        bankService.AccountCreation(bankName, accountNumber, password);
-                        Console.WriteLine("Account Sucessfully Created");
-                        break;
-
-                    case "2":
-                        Console.WriteLine("Enter Bank Name");
-                          bankName = Console.ReadLine();
-                        Console.Write("Enter Account Number: ");
-                          accountNumber = Console.ReadLine();
-                        Console.Write("Enter Your Account Password: ");
-                          password = (Console.ReadLine());
-
-                        if (bankService.IsBankPresent(bankName) && bankService.IsAccountPresent(bankName, accountNumber, password))
-                        
+                    Console.WriteLine("Choose an option number");
+                    string ChoosedOption = Console.ReadLine();
+                    LoginOption = Convert.ToInt32(ChoosedOption);
+                }
+                catch(Exception ex)
+                {
+                    Console.WriteLine(ex.Message);
+                }
+                switch (LoginOption)
+                {
+                 
+                    case 1:
+                        try
                         {
+                            Console.WriteLine("");
+                            Console.WriteLine("Enter Bank Name");
+                             bankName = Console.ReadLine();
+                            Console.Write("Enter Account Holder Name: ");
+                             accountName = Console.ReadLine();
+                            Console.Write("Enter Your Account Password: ");
+                            password = (Console.ReadLine());
+                            bankService.BankCreation(bankName);
+                            bankService.AccountCreation(bankName, accountName, password);
+                            Console.WriteLine("Account Sucessfully Created");
+                        }
+                        catch(Exception ex)
+                        {
+                            Console.WriteLine(ex.Message);
+                        }
+                    break;
+
+                    case 2:
+                        Console.WriteLine("Enter Bank Name");
+                    bankName = Console.ReadLine();
+                    Console.Write("Enter Account Holder Name: ");
+                    accountName = Console.ReadLine();
+                    Console.Write("Enter Your Account Password: ");
+                    password = (Console.ReadLine());
+                
+                         if (bankService.BankLogin(bankName) && bankService.AccountLogin(bankName, accountName, password))
+                            {      
                             do
                             {
                                 secureMenu();
-                                string MenuOption = Console.ReadLine();
-                                ServiceOption = Convert.ToInt32(MenuOption);
+                                try
+                                {
+                                    string MenuOption = Console.ReadLine();
+                                    ServiceOption = Convert.ToInt32(MenuOption);
+                                }
+                                catch(Exception ex)
+                                {
+                                    Console.WriteLine(ex.Message);
+                                }
                                 switch (ServiceOption)
                                 {
                                     case 1:
                                         int deposit_amount = 0;
                                         Console.Write("Enter the amount to deposit : rs ");
                                         deposit_amount = Convert.ToInt32(Console.ReadLine());
-                                        if (bankService.Deposit(bankName,accountNumber, deposit_amount))
+                                        try
                                         {
+                                            bankService.Deposit(bankName, accountName, deposit_amount);
                                             Console.WriteLine("Amount sucessfully deposited to your Account");
+                                            
                                         }
-                                        else
+                                        catch(Exception ex)
                                         {
-                                            Console.WriteLine("Invalid Account details");
+                                            Console.WriteLine(ex.Message);
                                         }
                                         break;
                                     case 2:
                                         int withdraw_amount = 0;
                                         Console.Write("Enter amount to withdraw: rs ");
                                         withdraw_amount = Convert.ToInt32(Console.ReadLine());
-                                        if (bankService.Withdraw(bankName,accountNumber, withdraw_amount))
+                                        try
                                         {
+                                            bankService.Withdraw(bankName, accountName, withdraw_amount);
+
                                             Console.WriteLine("Amount sucessfully withdrawn , Please collect your money ");
                                         }
-                                        else
+                                        catch(Exception ex)
                                         {
-                                            Console.WriteLine("Insufficient funds , please enter valid amount ");
-                                        }
+                                            Console.WriteLine(ex.Message);
+                                        } 
                                         break;
                                     case 3:
                                         
-                                        List<Transactions>Transactions= bankService.TransactionLog(bankName, accountNumber);
+                                        List<Tranaction>Transactions= bankService.TransactionLog(bankName, accountName);
                                         foreach (var d in Transactions)
                                         {
                                             Console.WriteLine(d.Id + " " + d.Type + " " + d.Amount+" "+ d.On);
@@ -119,10 +144,7 @@ namespace TechnovertAtm.CLI
 
                                         
                                     case 4:
-                                        //Console.WriteLine("Enter Your Bank Name : ");
-                                        //string SourceBankName = Console.ReadLine();
-                                        //Console.WriteLine("enter Your account Number : ");
-                                        //string SourceAccountNumber = Console.ReadLine();
+                                       
                                         Console.WriteLine("Enter the amount of money to be transferred : ");
                                         int transfered_money = Convert.ToInt32(Console.ReadLine());
                                         Console.WriteLine("Enter Destination Bank Name : ");
@@ -130,7 +152,7 @@ namespace TechnovertAtm.CLI
                                         Console.WriteLine("enter Destination Account Number  : ");
                                         string DestinationAccountNumber = Console.ReadLine();
 
-                                        if (bankService.Transfer(bankName,accountNumber,transfered_money,DestinationBankName,DestinationAccountNumber))
+                                        if (bankService.Transfer(bankName, accountName, transfered_money,DestinationBankName,DestinationAccountNumber))
                                         {
                                             Console.WriteLine("------ Amount sucessfully transferred -------");
                                         }
@@ -154,7 +176,7 @@ namespace TechnovertAtm.CLI
                         }
 
                         break;
-                    case "3":
+                    case 3:
                         break;
 
                     default:

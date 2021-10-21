@@ -2,49 +2,62 @@
 using System.Collections.Generic;
 using System.Text;
 using TechonovertAtm.Models;
+using TechonovertAtm.Models.Exceptions;
 
 namespace TechnovertAtm.Services
 {
     public class BankService
     {
-        private List<Banks> banks; 
+        private List<Bank> banks;
         DateTime PresentDate = DateTime.Today;
-        public BankService() 
+        public BankService()
         {
-            this.banks = new List<Banks>();
+            this.banks = new List<Bank>();
 
         }
         public bool InputChecker(string input)
         {
-            if(string.IsNullOrEmpty(input))
+            if (string.IsNullOrEmpty(input))
             {
                 return false;
             }
             return true;
         }
-        public string  BankIdPattern(string bankName)
+       
+    
+        public string BankIdPattern(string bankName)
         {
-            return bankName.Substring(0, 3) + PresentDate.ToString("dd") + PresentDate.ToString("MM") + PresentDate.ToString("yyyy");
+            if (bankName.Length < 3)
+            {
+                throw new InvalidBankNameException();
 
+            }
+               return bankName.Substring(0, 3) + PresentDate.ToString("dd") + PresentDate.ToString("MM") + PresentDate.ToString("yyyy");
+               
         }
         public string AccountIdPattern(string CustomerName)
         {
+            if (CustomerName.Length < 3)
+            {
+                throw new InvalidCustomerNameException();
+            }
             return CustomerName.Substring(0, 3) + PresentDate.ToString("dd") + PresentDate.ToString("MM") + PresentDate.ToString("yyyy");
         }
 
-        public string TransactionIdGenerator(string bankId,string accountId)
+        public string TransactionIdGenerator(string bankId, string accountId)
         {
             return "TXN" + bankId + accountId + PresentDate.ToString("dd") + PresentDate.ToString("MM") + PresentDate.ToString("yyyy");
         }
+    
 
 
 
-        public Banks BankChecker(string bankName)
+        public Bank BankChecker(string bankName)
         {
             foreach(var d in banks)
             {
                 string bankId = BankIdPattern(bankName);
-                if(d.Id == bankId)
+                if(d.Id  == bankId)
                 {
                     return d;
                 }
@@ -52,12 +65,12 @@ namespace TechnovertAtm.Services
             return null;
         }
 
-        public BankAccounts AccountChecker(string bankName, string accountNumber)
+        public BankAccount AccountChecker(string bankName, string customerName)
         {
-            Banks bank = BankChecker(BankIdPattern(bankName));
+            Bank bank = BankChecker(BankIdPattern(bankName));
             foreach(var d in bank.BankAccounts)
             {
-                if(d.Id==AccountIdPattern(accountNumber))
+                if(d.Id==AccountIdPattern(customerName))
                 {
                     return d;
                 }
@@ -66,17 +79,17 @@ namespace TechnovertAtm.Services
         }
 
 
-        public string BankCreation(string bankName)
+        public void BankCreation(string bankName)
         {
-            Banks newBank = new Banks()
+            Bank newBank = new Bank()
             {
                 Name = bankName,
                 Id = BankIdPattern(bankName),
-                BankAccounts = new List<BankAccounts>()
+                BankAccounts = new List<BankAccount>()
 
             };
             this.banks.Add(newBank);
-            return newBank.Id;
+            
         }
 
 
@@ -86,20 +99,20 @@ namespace TechnovertAtm.Services
         public void AccountCreation(string bankName, string CustomerName, string password)
         {
             string bankId = BankIdPattern(bankName);
-            BankAccounts account = new BankAccounts()
+            BankAccount account = new BankAccount()
             {
                 Id = AccountIdPattern(CustomerName),
                 Password = password,
                 Amount = 0,
-                Transactions = new List<Transactions>()
+                Transactions = new List<Tranaction>()
             };
-            Banks bank = BankChecker(bankId);
+            Bank bank = BankChecker(bankId);
             bank.BankAccounts.Add(account);
 
         }
 
 
-        public bool IsBankPresent(string bankName)
+        public bool BankLogin(string bankName)
         {
             foreach (var d in banks)
             {
@@ -113,11 +126,11 @@ namespace TechnovertAtm.Services
 
 
 
-        public bool IsAccountPresent(string bankName, string accountNumber, string password)
+        public bool AccountLogin(string bankName, string customerName, string password)
         {
-            if(InputChecker(BankIdPattern( bankName)) && InputChecker(AccountIdPattern( accountNumber)))
+            if(InputChecker(BankIdPattern( bankName)) && InputChecker(AccountIdPattern(customerName)))
             {
-                BankAccounts user = AccountChecker(BankIdPattern( bankName),AccountIdPattern( accountNumber));
+                BankAccount user = AccountChecker(BankIdPattern( bankName),AccountIdPattern(customerName));
                 if(user ==null || user.Password!=password)
                 {
                     return false;
@@ -128,19 +141,19 @@ namespace TechnovertAtm.Services
         }
          
 
-        public bool Deposit(string bankName,string accountNumber,decimal amount)
+        public bool Deposit(string bankName,string customerName, decimal amount)
         {
             string bankId = BankIdPattern(bankName);
-            string accountId = AccountIdPattern(accountNumber);
+            string accountId = AccountIdPattern(customerName);
             if(InputChecker(bankId) && InputChecker(accountId))
             {
-                BankAccounts user = AccountChecker(bankId, accountId);
+                BankAccount user = AccountChecker(bankId, accountId);
                 if(user == null)
                 {
-                    return false;
+                    throw new InvalidUserException();
                 }
                 user.Amount += amount;
-                user.Transactions.Add(new Transactions()
+                user.Transactions.Add(new Tranaction()
                 {
                     Id = TransactionIdGenerator(bankId, accountId),
                     Amount = amount,
@@ -156,19 +169,23 @@ namespace TechnovertAtm.Services
 
 
 
-        public bool Withdraw(string bankName, string accountNumber, decimal amount)
+        public bool Withdraw(string bankName, string customerName, decimal amount)
         {
             string bankId = BankIdPattern(bankName);
-            string accountId = AccountIdPattern(accountNumber);
+            string accountId = AccountIdPattern(customerName);
             if (InputChecker(bankId) && InputChecker(accountId))
             {
-                BankAccounts user = AccountChecker(bankId, accountId);
-                if (user == null || user.Amount<amount)
+                BankAccount user = AccountChecker(bankId, accountId);
+                if (user == null )
                 {
-                    return false;
+                    throw new InvalidUserException();
+                }
+                if(user.Amount < amount)
+                {
+                    throw new AmountNotSufficientException();
                 }
                 user.Amount -= amount;
-                user.Transactions.Add(new Transactions()
+                user.Transactions.Add(new Tranaction()
                 {
                     Id = TransactionIdGenerator(bankId, accountId),
                     Amount = amount,
@@ -184,24 +201,24 @@ namespace TechnovertAtm.Services
 
 
 
-        public bool Transfer(string sourceBankName, string sourceAccountNumber,decimal amount,string destinationBankName,string destinationAccountNumber)
+        public bool Transfer(string sourceBankName, string sourceCustomerName,decimal amount,string destinationBankName,string destinationAccountNumber)
 
         {
             string sourceBankId = BankIdPattern(sourceBankName);
-            string sourceAccountId = AccountIdPattern(sourceAccountNumber);
+            string sourceAccountId = AccountIdPattern(sourceCustomerName);
             string destinationBankId = BankIdPattern(destinationBankName);
             string destinationAccountId = AccountIdPattern(destinationAccountNumber);
             if(InputChecker(sourceAccountId) && InputChecker(destinationAccountId)&& InputChecker(sourceBankId))
             {
-                BankAccounts sourceAccount = AccountChecker(sourceBankId, sourceAccountId);
-                BankAccounts destinationAccount = AccountChecker(destinationBankId, destinationAccountId);
+                BankAccount sourceAccount = AccountChecker(sourceBankId, sourceAccountId);
+                BankAccount destinationAccount = AccountChecker(destinationBankId, destinationAccountId);
                 if(sourceAccount==null || destinationAccount == null || sourceAccount.Amount<amount)
                 {
                     return false;
                     
                 }
                 sourceAccount.Amount -= amount;
-                sourceAccount.Transactions.Add(new Transactions()
+                sourceAccount.Transactions.Add(new Tranaction()
                 {
                     Id = TransactionIdGenerator(sourceBankId, sourceAccountId),
                     Amount = amount,
@@ -209,7 +226,7 @@ namespace TechnovertAtm.Services
 
                 });
                 destinationAccount.Amount += amount;
-                destinationAccount.Transactions.Add(new Transactions()
+                destinationAccount.Transactions.Add(new Tranaction()
                 {
                     Id = TransactionIdGenerator(destinationBankId, destinationAccountId),
                     Amount = amount,
@@ -221,11 +238,11 @@ namespace TechnovertAtm.Services
 
 
 
-        public List<Transactions> TransactionLog(string bankName,string accountNumber)
+        public List<Tranaction> TransactionLog(string bankName,string customerName)
         {
             string bankId = BankIdPattern(bankName);
-            string accountId = AccountIdPattern(accountNumber);
-            List<Transactions> transactions = new List<Transactions>();
+            string accountId = AccountIdPattern(customerName);
+            List<Tranaction> transactions = new List<Tranaction>();
             foreach(var d in banks)
             {
                 if(d.Id==bankId)

@@ -4,12 +4,12 @@ using System.Text;
 
 namespace TechonovertAtm.Models
 {
-    public class Banks
+    public class Bank
     {
         public string Id { get; set; }
         public string Name { get; set; }
 
-        public List<BankAccounts> BankAccounts { get; set; }
+        public List<BankAccount> BankAccounts { get; set; }
 
 
     }
