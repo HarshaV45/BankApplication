@@ -17,3 +17,4 @@ C:\Users\91799\source\repos\TechnovertAtm.CLI\bin\Debug\netcoreapp3.1\Techonover
 C:\Users\91799\source\repos\TechnovertAtm.CLI\bin\Debug\netcoreapp3.1\TechnovertAtm.Services.pdb
 C:\Users\91799\source\repos\TechnovertAtm.CLI\bin\Debug\netcoreapp3.1\TechonovertAtm.Models.pdb
 C:\Users\91799\source\repos\TechnovertAtm.CLI\obj\Debug\netcoreapp3.1\TechnovertAtm.CLI.csproj.CopyComplete
+C:\Users\91799\source\repos\TechnovertAtm.CLI\bin\Debug\netcoreapp3.1\Newtonsoft.Json.dll

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using TechnovertAtm.CLI.Enums;
 using TechnovertAtm.Services;
 using TechonovertAtm.Models;
 
@@ -7,187 +8,72 @@ namespace TechnovertAtm.CLI
 {
     public class Program
     {
-
-       
-        public static void secureMenu()
+        static void Main()
         {
-            Console.WriteLine("|----------------------------|");
-            Console.WriteLine("|xyz bank ATM secure menu    |");
-            Console.WriteLine("|                            |");
-            Console.WriteLine("| 1.Deposit                  |");
-            Console.WriteLine("| 2.withdraw                 |");
-            Console.WriteLine("| 3.Transaction Log          |");
-            Console.WriteLine("| 4.Transfer                 |");
-            Console.WriteLine("| 5.Logout                   |");
-            Console.WriteLine("|                            |");
-            Console.WriteLine("|----------------------------|");
-            Console.WriteLine("                              ");
-            Console.Write("Enter your option:     ");
-
-
-
-        }
-
-        static void Main(string[] args)
-        {
-            BankService bankService = new BankService(); 
-            List<string> LoginOptions = new List<string>() { "1.Create Bank Account", "2.Login to Account", "3.Exit" };
-            Console.WriteLine("\nWelcome to XYZ bank ");
-           
-
-            int LoginOption = 0;       
-            int ServiceOption = 0;
-            string accountName = "";
-            string bankName = "";
-            string password = "";
-            do
+            StaffService staffService = new StaffService();
+            Data data = new Data();
+            CurrencyExchanger currencyExchanger = new CurrencyExchanger(data);
+            BankServices bankService = new BankServices(data);
+            CustomerService customerService = new CustomerService(bankService);
+            TransactionService transactionService = new TransactionService(data, customerService, currencyExchanger);
+            try
             {
-                foreach (var d in LoginOptions)
+
+                staffService.CreateStaffAccount("Admin"); //Creates default staff as Admin and defaulat password is STA+Name+@123
+                currencyExchanger.CurrencyExchange(); // Adds the default accepted currencies into the Application
+
+
+                bankService.BankCreation("SBI"); // Default banks and defalult BankId is BankName+123
+                bankService.BankCreation("Axis");
+                bankService.BankCreation("HDFC");
+
+                string[] loginOptions = { "1.Account Holder Login", "2.Staff Login", "3.Exit from Application" };
+                int choosedOption = 0;
+                bool stop = true;
+                do
                 {
-                    Console.WriteLine(d);
-                }
-                try
-                {
-                    Console.WriteLine("Choose an option number");
-                    string ChoosedOption = Console.ReadLine();
-                    LoginOption = Convert.ToInt32(ChoosedOption);
-                }
-                catch(Exception ex)
-                {
-                    Console.WriteLine(ex.Message);
-                }
-                switch (LoginOption)
-                {
-                 
-                    case 1:
-                        try
-                        {
-                            Console.WriteLine("");
-                            Console.WriteLine("Enter Bank Name");
-                             bankName = Console.ReadLine();
-                            Console.Write("Enter Account Holder Name: ");
-                             accountName = Console.ReadLine();
-                            Console.Write("Enter Your Account Password: ");
-                            password = (Console.ReadLine());
-                            bankService.BankCreation(bankName);
-                            bankService.AccountCreation(bankName, accountName, password);
-                            Console.WriteLine("Account Sucessfully Created");
-                        }
-                        catch(Exception ex)
-                        {
-                            Console.WriteLine(ex.Message);
-                        }
-                    break;
+                    foreach (var d in loginOptions)
+                    {
+                        Console.WriteLine(d);
+                    }
+                    try
+                    {
+                        Console.Write("Enter Option Number : ");
+                        choosedOption = Convert.ToInt32(Console.ReadLine());
+                    }
+                    catch (Exception ex)
+                   {
+                        Console.WriteLine(ex.Message);
+                    }
+                    switch (choosedOption)
+                    {
+                        case (int)LoginOptions.AccountHolder:
+                            CustomerConsole accountHolder = new CustomerConsole();
+                            accountHolder.Login(bankService, customerService, transactionService);
+                            break;
 
-                    case 2:
-                        Console.WriteLine("Enter Bank Name");
-                    bankName = Console.ReadLine();
-                    Console.Write("Enter Account Holder Name: ");
-                    accountName = Console.ReadLine();
-                    Console.Write("Enter Your Account Password: ");
-                    password = (Console.ReadLine());
-                
-                         if (bankService.BankLogin(bankName) && bankService.AccountLogin(bankName, accountName, password))
-                            {      
-                            do
-                            {
-                                secureMenu();
-                                try
-                                {
-                                    string MenuOption = Console.ReadLine();
-                                    ServiceOption = Convert.ToInt32(MenuOption);
-                                }
-                                catch(Exception ex)
-                                {
-                                    Console.WriteLine(ex.Message);
-                                }
-                                switch (ServiceOption)
-                                {
-                                    case 1:
-                                        int deposit_amount = 0;
-                                        Console.Write("Enter the amount to deposit : rs ");
-                                        deposit_amount = Convert.ToInt32(Console.ReadLine());
-                                        try
-                                        {
-                                            bankService.Deposit(bankName, accountName, deposit_amount);
-                                            Console.WriteLine("Amount sucessfully deposited to your Account");
-                                            
-                                        }
-                                        catch(Exception ex)
-                                        {
-                                            Console.WriteLine(ex.Message);
-                                        }
-                                        break;
-                                    case 2:
-                                        int withdraw_amount = 0;
-                                        Console.Write("Enter amount to withdraw: rs ");
-                                        withdraw_amount = Convert.ToInt32(Console.ReadLine());
-                                        try
-                                        {
-                                            bankService.Withdraw(bankName, accountName, withdraw_amount);
+                        case (int)LoginOptions.StaffLogin:
+                            StaffConsole staff = new StaffConsole();
+                            staff.Login(data, bankService, customerService, staffService, transactionService);
+                            break;
 
-                                            Console.WriteLine("Amount sucessfully withdrawn , Please collect your money ");
-                                        }
-                                        catch(Exception ex)
-                                        {
-                                            Console.WriteLine(ex.Message);
-                                        } 
-                                        break;
-                                    case 3:
-                                        
-                                        List<Tranaction>Transactions= bankService.TransactionLog(bankName, accountName);
-                                        foreach (var d in Transactions)
-                                        {
-                                            Console.WriteLine(d.Id + " " + d.Type + " " + d.Amount+" "+ d.On);
-                                        }
-                                        break;
 
-                                        
-                                    case 4:
-                                       
-                                        Console.WriteLine("Enter the amount of money to be transferred : ");
-                                        int transfered_money = Convert.ToInt32(Console.ReadLine());
-                                        Console.WriteLine("Enter Destination Bank Name : ");
-                                        string DestinationBankName = Console.ReadLine();
-                                        Console.WriteLine("enter Destination Account Number  : ");
-                                        string DestinationAccountNumber = Console.ReadLine();
+                        case (int)LoginOptions.Exit:
+                            stop = false;
+                            Console.WriteLine("Exited Sucessfully");
+                            break;
+                        default:
+                            Console.WriteLine("Invalid Option Entered") ;
+                            break;
 
-                                        if (bankService.Transfer(bankName, accountName, transfered_money,DestinationBankName,DestinationAccountNumber))
-                                        {
-                                            Console.WriteLine("------ Amount sucessfully transferred -------");
-                                        }
-                                        else
-                                        {
-                                            Console.WriteLine("Please enter valid details");
-                                        }
-                                        break;
-                                    case 5:
-                                        Console.WriteLine("Logout sucessful");
-                                        break;
-                                    default:
-                                        Console.WriteLine("Invalid option enterned");
-                                        break;
-                                }
-                            } while (ServiceOption != 5);
-                        }
-                        else
-                        {
-                            Console.WriteLine("Invalid Details ,Please enter details Correctly  ");
-                        }
-
-                        break;
-                    case 3:
-                        break;
-
-                    default:
-                        Console.WriteLine("Invalid option entered");
-                        break;
-
-                }
-            } while (LoginOption != 3);
-            Console.WriteLine("Thanks for using xyz bank");
-
+                    }
+                } while (stop);
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
         }
-
     }
 }
+

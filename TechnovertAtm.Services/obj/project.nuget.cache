@@ -1,8 +1,10 @@
 {
   "version": 2,
-  "dgSpecHash": "+Ej3zLnkhLOrulinnT+zq4ZQMJSdLFzZgVBAjYsPYmQRAx7pvqD58XE6nYgU+nD/thpBBOMUW1zbMFk00T9HxQ==",
+  "dgSpecHash": "mzhWgvO8j/3DqIyhjGuk7wfyYZJ+2zf639R9ID4S5UvUkaUk0QbQpxA4we1tEGBf0U+XwoasgHFcOcvz10b+uw==",
   "success": true,
   "projectFilePath": "C:\\Users\\91799\\source\\repos\\TechnovertAtm.Services\\TechnovertAtm.Services.csproj",
-  "expectedPackageFiles": [],
+  "expectedPackageFiles": [
+    "C:\\Users\\91799\\.nuget\\packages\\newtonsoft.json\\13.0.1\\newtonsoft.json.13.0.1.nupkg.sha512"
+  ],
   "logs": []
 }

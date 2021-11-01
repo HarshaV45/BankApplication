@@ -2,11 +2,13 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace TechonovertAtm.Models
+namespace TechonovertAtm.Models.Enums
 {
     public enum AccountStatus
     {
         Active,
-        Inactive
+        InActive,
+        Closed,
+        Other
     }
 }
