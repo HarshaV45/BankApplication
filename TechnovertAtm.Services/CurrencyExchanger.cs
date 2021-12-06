@@ -10,10 +10,11 @@ namespace TechnovertAtm.Services
 {
     public class CurrencyExchanger
     {
-        private Data data;
+        //  private Data data;
+        public BankDbContext DbContext = new BankDbContext();
         public CurrencyExchanger(Data data)
         {
-            this.data = data;
+            CurrencyExchange();
         }
         public decimal Converter(decimal amount,decimal exchangeRate)
         {
@@ -26,20 +27,21 @@ namespace TechnovertAtm.Services
             string url = "http://www.floatrates.com/daily/inr.json";
             string json = new WebClient().DownloadString(url);
             var currency = JsonConvert.DeserializeObject<dynamic>(json);
-            this.data.currencies.Add(new Currency()
+            var newCurrency=(new Currency()
             {
                 CurrencyCode = currency.usd.code,
                 CurrencyName = currency.usd.name,
                 CurrencyExchangeRate = currency.usd.inverseRate
             });
-
-            this.data.currencies.Add(new Currency()
+            DbContext.Curriencies.Add(newCurrency);
+            var newcurrency =(new Currency()
             {
                 CurrencyCode = currency.eur.code,
                 CurrencyName = currency.eur.name,
                 CurrencyExchangeRate = currency.eur.inverseRate
             });
 
+            DbContext.Curriencies.Add(newcurrency);
         }
     }
 }

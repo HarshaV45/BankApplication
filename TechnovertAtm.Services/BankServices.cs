@@ -4,12 +4,14 @@ using System.Text;
 using TechonovertAtm.Models;
 using TechonovertAtm.Models.Exceptions;
 
+
 namespace TechnovertAtm.Services
 {
     public class BankServices
     {
         private Data bankdata;
         DateTime PresentDate = DateTime.Today;
+        private BankDbContext DbContext = new BankDbContext();
         public BankServices(Data bankdata)
         {
             this.bankdata = bankdata;
@@ -29,7 +31,7 @@ namespace TechnovertAtm.Services
 
         public Bank BankChecker(string bankId)
         {
-            foreach (var d in bankdata.banks)
+            foreach (var d in DbContext.Banks)
             {
                 if (d.BankId == bankId)
                 {
@@ -41,14 +43,21 @@ namespace TechnovertAtm.Services
 
         public void BankCreation(string bankName)
         {
-            Bank newBank = new Bank()
+            var newBank = new Bank()
             {
                 Name = bankName,
                 BankId = bankName+123,
-                BankAccounts = new List<BankAccount>()
-
+               
             };
-            this.bankdata.banks.Add(newBank);
+            try
+            {
+                DbContext.Banks.Add(newBank);
+                DbContext.SaveChanges();
+            }
+            catch(Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
 
         }
     }

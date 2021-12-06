@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using TechonovertAtm.Models;
 using TechonovertAtm.Models.Exceptions;
@@ -12,6 +13,7 @@ namespace TechnovertAtm.Services
     {
         private BankServices bankService;
         DateTime PresentDate = DateTime.Today;
+        private BankDbContext DbContext = new BankDbContext();
         public CustomerService(BankServices bankService)
         {
             this.bankService = bankService;
@@ -19,23 +21,23 @@ namespace TechnovertAtm.Services
 
 
 
-        public BankAccount AccountChecker(string bankId, string accountId)
-        {   
-            if(String.IsNullOrWhiteSpace(bankId) && String.IsNullOrWhiteSpace(accountId))
-            {
-                throw new InvalidInputException();
-            }
-            Bank bank = this.bankService.BankChecker(bankId);
-            foreach (var d in bank.BankAccounts)
-            {
-                if (d.BankId ==bankId && d.AccountId == accountId)
-                {
-                    return d;
-                }
-            }
-            throw new InvalidUserException();
+        //public BankAccount AccountChecker(string bankId, string accountId)
+        //{   
+        //    if(String.IsNullOrWhiteSpace(bankId) && String.IsNullOrWhiteSpace(accountId))
+        //    {
+        //        throw new InvalidInputException();
+        //    }
+        //    Bank bank = this.bankService.BankChecker(bankId);
+        //    foreach (var d in bank.BankAccounts)
+        //    {
+        //        if (d.BankId ==bankId && d.AccountId == accountId)
+        //        {
+        //            return d;
+        //        }
+        //    }
+        //    throw new InvalidUserException();
 
-        }
+        //}
 
 
 
@@ -50,7 +52,7 @@ namespace TechnovertAtm.Services
                 throw new InvalidInputException();
             }
             
-            BankAccount user = AccountChecker(bankId, accountId);
+            var user = DbContext.BankAccounts.SingleOrDefault(m => m.AccountId==accountId && m.BankId ==bankId);
             if (user == null || user.Password != password)
             {
                 throw new InvalidInputException();
@@ -58,12 +60,7 @@ namespace TechnovertAtm.Services
         }
             
 
-        public void ResetPassword(string bankId, string accountId, string password)
-        {
-            BankAccount account = AccountChecker(bankId, accountId);
-            account.Password = password;
-
-        }
+      
     }
 
 }

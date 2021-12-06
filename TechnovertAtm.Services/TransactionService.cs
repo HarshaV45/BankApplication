@@ -11,16 +11,17 @@ namespace TechnovertAtm.Services
     public class TransactionService
     {
         private CustomerService customerService;
-        private Data data;
+        //private Data data;
         private CurrencyExchanger currencyExchanger;
         DateTime PresentDate = DateTime.Today;
-        public int limit = 50000;
+        private BankDbContext DbContext = new BankDbContext();
+       // public int limit = 50000;
 
         Random random = new Random();
         public TransactionService(Data data,CustomerService customer,CurrencyExchanger currencyExchanger)
 
         {
-            this.data = data;
+            
             this.currencyExchanger = currencyExchanger;
             this.customerService = customer;
         }
@@ -32,9 +33,9 @@ namespace TechnovertAtm.Services
 
         public void Deposit(string bankId, string accountId, decimal amount,string currencyCode)
         {
-            BankAccount user = this.customerService.AccountChecker(bankId, accountId);
-            Currency currentCurrency = this.data.currencies.SingleOrDefault(x => x.CurrencyCode == currencyCode);
-            if (user == null)
+            var UserInfo = DbContext.BankAccounts.SingleOrDefault(m => m.AccountId == accountId && m.BankId == bankId);
+            var currentCurrency = DbContext.Curriencies.SingleOrDefault(x => x.CurrencyCode == currencyCode);
+            if (UserInfo == null)
             {
                 throw new InvalidUserException();
             }
@@ -44,18 +45,23 @@ namespace TechnovertAtm.Services
             }
             amount = currencyExchanger.Converter(amount, currentCurrency.CurrencyExchangeRate);
             amount = Math.Round(amount, 2);
-            user.Amount += amount;
-            user.Transactions.Add(new Transaction()
+            UserInfo.Amount += amount;
+            DbContext.BankAccounts.Update(UserInfo);
+
+            var newTransaction = new Transaction()
             {
                 Id = TransactionIdGenerator(bankId, accountId),
                 Amount = amount,
                 Type = TransactionType.Credit,
-                On =PresentDate.ToString("g")
-                
+                On = PresentDate.ToString("g"),
+                SourceBankId=bankId,
+                SourceAccountId=accountId
               
 
 
-            });
+            };
+            DbContext.Transactions.Add(newTransaction);
+            DbContext.SaveChanges();
             
         }
 
@@ -63,26 +69,31 @@ namespace TechnovertAtm.Services
 
         public void Withdraw(string bankId, string accountId, decimal amount)
         {
-            BankAccount user = this.customerService.AccountChecker(bankId, accountId);
-            if (user == null)
+            var UserInfo = DbContext.BankAccounts.SingleOrDefault(m => m.AccountId == accountId && m.BankId == bankId);
+
+            if (UserInfo == null)
             {
                 throw new InvalidUserException();
             }
-            if (user.Amount < amount)
+            if (UserInfo.Amount < amount)
             {
                 throw new AmountNotSufficientException();
             }
             amount = Math.Round(amount, 2);
-            user.Amount -= amount;
-            user.Transactions.Add(new Transaction()
-            {
+            UserInfo.Amount -= amount;
+            var newTransaction =new Transaction()
+            { 
+                SourceAccountId=accountId,
+                SourceBankId=bankId,
                 Id = TransactionIdGenerator(bankId, accountId),
                 Amount = amount,
                 Type = TransactionType.Debit,
                 On =PresentDate.ToString("g")
 
 
-            });
+            };
+            DbContext.Transactions.Add(newTransaction);
+            DbContext.SaveChanges();
             
         }
 
@@ -119,27 +130,32 @@ namespace TechnovertAtm.Services
 
         {
         
-            BankAccount sourceAccount = this.customerService.AccountChecker(sourceBankId, sourceAccountId);
-            BankAccount destinationAccount = this.customerService.AccountChecker(destinationBankId, destinationAccountId);
+           // BankAccount sourceAccount = this.customerService.AccountChecker(sourceBankId, sourceAccountId);
+           // BankAccount destinationAccount = this.customerService.AccountChecker(destinationBankId, destinationAccountId);
             amount = Math.Round(amount, 2);
             decimal tax = TaxCalculator(sourceBankId, destinationBankId, amount, taxType);
             tax = Math.Round(tax, 2);
 
-            
 
 
+            var UserInfo = DbContext.BankAccounts.SingleOrDefault(m => m.AccountId == sourceAccountId && m.BankId == sourceBankId);
 
-            if (sourceAccount == null || destinationAccount == null )
+
+            if (UserInfo ==null )
             {
                 throw new InvalidCustomerNameException();
 
             }
-            if(sourceAccount.Amount < amount+tax)
+            if(UserInfo.Amount < amount+tax)
             {
                 throw new AmountNotSufficientException();
             }
-            sourceAccount.Amount -= amount+tax;
-            sourceAccount.Transactions.Add(new Transaction()
+            var beneInfo = DbContext.BankAccounts.SingleOrDefault(m => m.AccountId == destinationAccountId && m.BankId == destinationBankId);
+
+            UserInfo.Amount -= amount+tax;
+            beneInfo.Amount += amount;
+
+            var userTransaction =new Transaction()
             {
                 Id = TransactionIdGenerator(sourceBankId, sourceAccountId),
                 Amount = amount,
@@ -152,9 +168,9 @@ namespace TechnovertAtm.Services
                 DestinationBankId=destinationBankId,
                 DestinationAccountId=destinationAccountId
 
-            });
-            destinationAccount.Amount += amount;
-            destinationAccount.Transactions.Add(new Transaction()
+            };
+           
+            var beneTXN =new Transaction()
             {
                 Id = TransactionIdGenerator(destinationBankId, destinationAccountId),
                 Amount = amount,
@@ -167,25 +183,32 @@ namespace TechnovertAtm.Services
                 DestinationBankId = destinationBankId,
                 DestinationAccountId = destinationAccountId
 
-            });
+            };
             
         }
 
-        public List<Transaction> TransactionLog(string bankId, string accountId)
+        public List<List<string>> TransactionLog(string bankId, string accountId)
         {
-            BankAccount account = this.customerService.AccountChecker(bankId, accountId);
-            return account.Transactions;
-
+            var info = DbContext.Transactions.Where(m => m.Id == "TXN1").Select(c => new { c.Id, c.SourceBankId, c.SourceAccountId, c.Amount, c.Tax,  c.TaxType, c.DestinationBankId, c.DestinationAccountId }).ToList();
+            List<List<string>> transactions = new List<List<string>>();
+            foreach(var row in info)
+            {
+                List<string> temp = new List<string>();
+                string[] values = { row.Id, row.SourceBankId, row.SourceAccountId, row.Amount.ToString(), row.Tax.ToString(), row.TaxType.ToString(), row.DestinationBankId, row.DestinationAccountId };
+                temp.AddRange(values);
+                transactions.Add(temp);
+            }
+            return transactions;
         }
 
         public decimal ViewBalance(string bankId,string accountId)
         {
-            BankAccount bankAccount = this.customerService.AccountChecker(bankId, accountId);
-            if(bankAccount==null)
+            var info = DbContext.BankAccounts.SingleOrDefault(m => m.AccountId == accountId && m.BankId == bankId);
+            if(info==null)
             {
                 throw new InvalidCustomerNameException();
             }
-            return bankAccount.Amount;
+            return info.Amount;
         }
     }
 }
