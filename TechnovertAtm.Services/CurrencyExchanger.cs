@@ -10,11 +10,11 @@ namespace TechnovertAtm.Services
 {
     public class CurrencyExchanger
     {
-        //  private Data data;
+        
         public BankDbContext DbContext = new BankDbContext();
-        public CurrencyExchanger(Data data)
+        public CurrencyExchanger()
         {
-            CurrencyExchange();
+           // CurrencyExchange();
         }
         public decimal Converter(decimal amount,decimal exchangeRate)
         {
@@ -22,26 +22,42 @@ namespace TechnovertAtm.Services
             return actualAmount;
         }
 
-     public void CurrencyExchange()
+        public void CurrencyExchange()
         {
-            string url = "http://www.floatrates.com/daily/inr.json";
-            string json = new WebClient().DownloadString(url);
-            var currency = JsonConvert.DeserializeObject<dynamic>(json);
-            var newCurrency=(new Currency()
+            try
             {
-                CurrencyCode = currency.usd.code,
-                CurrencyName = currency.usd.name,
-                CurrencyExchangeRate = currency.usd.inverseRate
-            });
-            DbContext.Curriencies.Add(newCurrency);
-            var newcurrency =(new Currency()
-            {
-                CurrencyCode = currency.eur.code,
-                CurrencyName = currency.eur.name,
-                CurrencyExchangeRate = currency.eur.inverseRate
-            });
 
-            DbContext.Curriencies.Add(newcurrency);
-        }
+
+                string url = "http://www.floatrates.com/daily/inr.json";
+                string json = new WebClient().DownloadString(url);
+                var currencies = JsonConvert.DeserializeObject<dynamic>(json);
+                int limit = 10;
+                int currencyCounter = 0;
+                foreach (var currency in currencies)
+                {
+                    if (currencyCounter == limit)
+                    {
+                        break;
+                    }
+
+                    var newCurrency = (new Currency()
+                    {
+                        CurrencyCode = currency.Value.code,
+                        CurrencyName = currency.Value.name,
+                        CurrencyExchangeRate = currency.Value.inverseRate
+                    });
+                    DbContext.Curriencies.Add(newCurrency);
+
+                    currencyCounter += 1;
+                }
+                DbContext.SaveChanges();
+                
+             
+            }
+            catch(Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+            }
     }
 }

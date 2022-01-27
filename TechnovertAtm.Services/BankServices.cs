@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using TechonovertAtm.Models;
 using TechonovertAtm.Models.Exceptions;
@@ -9,12 +10,12 @@ namespace TechnovertAtm.Services
 {
     public class BankServices
     {
-        private Data bankdata;
+       
         DateTime PresentDate = DateTime.Today;
-        private BankDbContext DbContext = new BankDbContext();
-        public BankServices(Data bankdata)
+        private BankDbContext DbContext ;
+        public BankServices(BankDbContext dbContext)
         {
-            this.bankdata = bankdata;
+            this.DbContext = dbContext;
         }
 
         public string BankIdPattern(string bankName)
@@ -29,24 +30,22 @@ namespace TechnovertAtm.Services
         }
 
 
-        public Bank BankChecker(string bankId)
+        public void BankChecker(string bankId) 
         {
-            foreach (var d in DbContext.Banks)
+            var info = DbContext.Banks.SingleOrDefault(m => m.BankId == bankId);
+            if (info == null)
             {
-                if (d.BankId == bankId)
-                {
-                    return d;
-                }
+                throw new BankNotPresentException();
             }
-            throw new BankNotPresentException();
         }
 
-        public void BankCreation(string bankName)
+        public void BankCreation(string bankName,string description)
         {
             var newBank = new Bank()
             {
                 Name = bankName,
                 BankId = bankName+123,
+                Description =description
                
             };
             try

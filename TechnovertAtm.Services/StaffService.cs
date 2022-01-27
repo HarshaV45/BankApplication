@@ -10,20 +10,20 @@ namespace TechnovertAtm.Services
 {
     public class StaffService
     {
-        private List<StaffAccount> staff;
+       // private List<StaffAccount> staff;
         DateTime PresentDate = DateTime.Today;
-        private Data data;
+        
         private BankServices bankService;
         private CustomerService customerService;
         private TransactionService transactionService;
-        private BankDbContext DbContext = new BankDbContext();
+        private BankDbContext DbContext;
         Random random = new Random();
 
 
 
-        public StaffService()
+        public StaffService(BankDbContext dbContext)
         {
-            this.staff = new List<StaffAccount>();
+            this.DbContext = dbContext;
 
         }
 
@@ -43,42 +43,46 @@ namespace TechnovertAtm.Services
             return CustomerName.Substring(0, 3) + PresentDate.ToString("dd") + PresentDate.ToString("MM") + PresentDate.ToString("yyyy") + PresentDate.ToString("mm")+PresentDate.ToString("ss");
         }
 
-        public StaffAccount StaffFinder(string id)
-        {
-            return this.staff.SingleOrDefault(x => x.Id == id);
-        }
-
+       
 
         public void CreateStaffAccount(string name)
         {
-            var newStaff = new StaffAccount()
+            try
             {
-                Name = name,
-                Password = "STA" + name + "@123",
-                Id = name,
-               
-            };
-            DbContext.Staff.Add(newStaff);
-            DbContext.SaveChanges();
+                var newStaff = new StaffAccount()
+                {
+                    Name = name,
+                    Password = "STA" + name + "@123",
+                    Id = name,
 
-
+                };
+                DbContext.Staff.Add(newStaff);
+                DbContext.SaveChanges();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
         }
 
 
-        public string[] CreateAccount(string name, string bankId)
+        public string[] CreateAccount(string name, string bankId,int age)
         {
-            BankAccount newAccount = new BankAccount()
+            var newAccount = new BankAccount()
             {
                 Name = name,
                 BankId = bankId,
+                Age = age,
                 AccountId = AccountIdPattern(name),
                 Password = PasswordGeneration(name),
                 Amount = 0,
-                Gender =GenderType.Male,
+                
+                
                 
             };
-            Bank bank = this.bankService.BankChecker(bankId);
+            
             DbContext.BankAccounts.Add(newAccount);
+            DbContext.SaveChanges();
 
 
             return new string[] { newAccount.AccountId, newAccount.Password };
@@ -86,13 +90,14 @@ namespace TechnovertAtm.Services
         }
 
 
-        public void Login(Data data,BankServices bankService, CustomerService customerService, TransactionService transactionService, string id,string password)
+        public void Login(BankServices bankService, CustomerService customerService, TransactionService transactionService, string id,string password)
         {
             if (String.IsNullOrWhiteSpace(id) || String.IsNullOrWhiteSpace(password))
             {
                throw new InvalidInputException();
             }
             var staffAccount = DbContext.Staff.SingleOrDefault(m =>m.Id==id);
+            
             if(staffAccount==null)
             {
                 throw new InvalidUserException();
@@ -109,19 +114,19 @@ namespace TechnovertAtm.Services
         }
 
 
-        //public BankAccount viewAccountDetails(string bankId, string accountId)
-        //{
-        //    BankAccount account = this.customerService.AccountChecker(bankId, accountId);
-        //    if(account==null)
-        //    {
-        //        throw new InvalidUserException();
-        //    }
-        //    return account;
-        //}
+        public BankAccount viewAccountDetails(string bankId, string accountId)
+        {
+            var account = DbContext.BankAccounts.SingleOrDefault(m => m.BankId == bankId && m.AccountId == accountId);
+            if (account == null)
+            {
+                throw new InvalidUserException();
+            }
+            return account;
+        }
 
-       
 
-        public void UpdateAccount(string accountId, string bankId, string newName,string newPassword,int? newAge=0,GenderType?newGender=null)
+
+        public void UpdateAccount(string accountId, string bankId, string newName,string newPassword,int? newAge=0)
         {
             var info = DbContext.BankAccounts.SingleOrDefault(m => m.AccountId == accountId && m.BankId == bankId);
             if (info == null)
@@ -137,10 +142,10 @@ namespace TechnovertAtm.Services
                 info.Password = newPassword;
             }
           
-            else if (String.IsNullOrEmpty(newGender + "") == false)
-            {
-                info.Gender = (GenderType)newGender;
-            }
+            //else if (String.IsNullOrEmpty(newGender + "") == false)
+            //{
+            //    info.Gender = (GenderType)newGender;
+            //}
             DbContext.BankAccounts.Update(info);
             DbContext.SaveChanges();
         }
@@ -188,44 +193,47 @@ namespace TechnovertAtm.Services
 
         public void RevertTransaction(string bankId,string accountId,string transactionId)
         {
-            List<List<string>> result = this.transactionService.TransactionLog(bankId, accountId);
-
-            if (result.Count == 0)
+            try
             {
-                throw new InsufficientTransactions();
+                var userInfo = DbContext.BankAccounts.SingleOrDefault(m => m.BankId == bankId && m.AccountId == accountId);
+                if (userInfo == null)
+                    throw new Exception("Invalid Transaction Id ");
+
+                var userTxn = DbContext.Transactions.SingleOrDefault(m => m.Id == transactionId && m.AccountId == accountId && m.BankId == bankId);
+                if (userTxn == null)
+                    throw new Exception("Invalid Transacrion Id ");
+
+                var beneInfo = DbContext.BankAccounts.SingleOrDefault(m => m.BankId == userTxn.DestinationBankId && m.AccountId == userTxn.DestinationAccountId);
+                if (beneInfo == null)
+                    throw new Exception("Beneficiary Account was not Available!");
+
+                string beneTxnId = "TXN" + userTxn.DestinationBankId + userTxn.DestinationAccountId + transactionId.Substring(29);
+
+                var beneTxn = DbContext.Transactions.SingleOrDefault(m => m.Id == beneTxnId && m.BankId == userTxn.DestinationBankId && m.AccountId == userTxn.DestinationAccountId);
+
+                if (userTxn.Type == "Debit")
+                {
+                    userInfo.Amount += userTxn.Amount;
+                    beneInfo.Amount-= userTxn.Amount;
+                }
+                else
+                {
+                    userInfo.Amount -= userTxn.Amount;
+                    beneInfo.Amount += userTxn.Amount;
+                }
+
+                DbContext.Transactions.Remove(userTxn);
+                DbContext.Transactions.Remove(beneTxn);
             }
-            //BankAccount bankAccount = this.customerService.AccountChecker(bankId, accountId);
-            //if(bankAccount==null)
-            //{
-            //    throw new InvalidCustomerNameException();
-            //}
-            //List<Transaction> transactions = bankAccount.Transactions;
-            //if(transactions.Count==0)
-            //{
-            //    throw new InsufficientTransactions();
-            //}
-            //Transaction revertTransaction = transactions.SingleOrDefault(x => x.Id == transactionId);
-            //if(revertTransaction==null)
-            //{
-            //    throw new InvalidInputException();
-            //}
-            //transactions.Remove(revertTransaction);
-            //BankAccount destinationAccount = this.customerService.AccountChecker(revertTransaction.DestinationBankId, revertTransaction.DestinationAccountId);
-            //List<Transaction> destinationtransaction = destinationAccount.Transactions;
-            //Transaction destinationUndoTransaction = destinationtransaction.SingleOrDefault(x => x.Id == transactionId);
-            //destinationtransaction.Remove(destinationUndoTransaction);
-
-            //destinationAccount.Amount -= revertTransaction.Amount;
-            //bankAccount.Amount += revertTransaction.Amount;
-
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
         }
 
 
-
-        
-
-
     }
-}
+
 
 

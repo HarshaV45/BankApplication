@@ -13,9 +13,10 @@ namespace TechnovertAtm.Services
     {
         private BankServices bankService;
         DateTime PresentDate = DateTime.Today;
-        private BankDbContext DbContext = new BankDbContext();
-        public CustomerService(BankServices bankService)
+        private BankDbContext DbContext;
+        public CustomerService(BankDbContext dbContext,BankServices bankService)
         {
+            this.DbContext = dbContext;
             this.bankService = bankService;
         }
 
@@ -52,7 +53,7 @@ namespace TechnovertAtm.Services
                 throw new InvalidInputException();
             }
             
-            var user = DbContext.BankAccounts.SingleOrDefault(m => m.AccountId==accountId && m.BankId ==bankId);
+            var user = DbContext.BankAccounts.SingleOrDefault( m => m.BankId==bankId && m.AccountId == accountId);
             if (user == null || user.Password != password)
             {
                 throw new InvalidInputException();

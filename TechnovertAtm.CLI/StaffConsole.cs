@@ -9,7 +9,7 @@ namespace TechnovertAtm.CLI
 {
     public class StaffConsole
     {
-        public void Login(Data data,BankServices bankService,CustomerService customerService,StaffService staffService,TransactionService transactionService)
+        public void Login(BankServices bankService,CustomerService customerService,StaffService staffService,TransactionService transactionService)
         {
             try
             {
@@ -19,7 +19,7 @@ namespace TechnovertAtm.CLI
                 Console.Write("Enter your password: ");
                 password = Console.ReadLine();
 
-                staffService.Login(data, bankService, customerService, transactionService, StaffId, password);
+                //staffService.Login( bankService, customerService, transactionService, StaffId, password);
            
             string[] staffOptions = { "1.Create new Account", "2.Update Account", "3.Delete Account", "4.Customer Transaction History", "5.Revert Transaction", "6.Add new Currency", "7.View Account Details", "8.Logout" };
             int choosedOption = 0;
@@ -47,13 +47,20 @@ namespace TechnovertAtm.CLI
                     case (int)StaffOptions.NewAccount:
 
                         string name, bankName;
+                        int age = 0;
                         Console.Write("Enter the Account Holder name :");
                         name = Console.ReadLine();
                         Console.Write("Enter Bank Id : ");
                         bankName = Console.ReadLine();
+                        Console.Write("Enter the Age : ");
+                        string tempAge = Console.ReadLine();
+                        if (String.IsNullOrEmpty(tempAge) == false)
+                        {
+                          age = Convert.ToInt32(tempAge);
+                        }
                         try
                         {
-                            string[] details = staffService.CreateAccount(name, bankName);
+                            string[] details = staffService.CreateAccount(name, bankName,age);
                             string newId = details[0], accountpassword = details[1];
 
                             Console.WriteLine("New Account Credintials are : ");
@@ -137,8 +144,8 @@ namespace TechnovertAtm.CLI
                             Console.WriteLine("Transaction Log");
                             foreach (var transaction in transactions)
                             {
-                                Console.WriteLine(transaction.Id + "  " + transaction.Amount + "  " + transaction.Type + "  " + transaction.On);
-                            }
+                               Console.WriteLine(transaction.Id + "  " + transaction.Amount + "  " + transaction.Type + "  " + transaction.On);
+                           }
 
                         }
                         catch (Exception ex)
@@ -153,13 +160,7 @@ namespace TechnovertAtm.CLI
                         accountId = Console.ReadLine();
                         try
                         {
-                            List<Transaction> transactions = staffService.viewTransactions(bankId, accountId);
-                            Console.WriteLine("Transaction Log");
-                                foreach(var transaction in transactions)
-                                {
-                                    Console.WriteLine(transaction.Id +"  "+transaction.Amount+"   "+transaction.Type+"   "+transaction.On);
-                                }
-                                Console.Write("Enter Transaction Id : ");
+                            List<Transaction> transaction = transactionService.TransactionLog(bankId, accountId);
                             string transactionId = Console.ReadLine();
                             staffService.RevertTransaction(bankId, accountId, transactionId);
                             Console.WriteLine("Transaction has been reverted");
@@ -170,19 +171,19 @@ namespace TechnovertAtm.CLI
                         }
                         break;
 
-                    case (int)StaffOptions.NewCurrency:
-                        string currencyName, currencyCode;
-                        decimal currencyExchangeRate;
-                        Console.Write("Enter the name of new Currency : ");
-                        currencyName = Console.ReadLine();
-                        Console.Write("Enter the new currency code : ");
-                        currencyCode = Console.ReadLine();
-                        Console.Write("Enter the Exchange rate with respect to INR : ");
-                        currencyExchangeRate = Convert.ToInt32(Console.ReadLine());
-                        staffService.AddNewCurrency(currencyName, currencyCode, currencyExchangeRate);
-                        Console.WriteLine("New Currency sucessfully Added");
+                        case (int)StaffOptions.NewCurrency:
+                            string currencyName, currencyCode;
+                            decimal currencyExchangeRate;
+                            Console.Write("Enter the name of new Currency : ");
+                            currencyName = Console.ReadLine();
+                            Console.Write("Enter the new currency code : ");
+                            currencyCode = Console.ReadLine();
+                            Console.Write("Enter the Exchange rate with respect to INR : ");
+                            currencyExchangeRate = Convert.ToInt32(Console.ReadLine());
+                            staffService.AddNewCurrency(currencyName, currencyCode, currencyExchangeRate);
+                            Console.WriteLine("New Currency sucessfully Added");
 
-                        break;
+                            break;
                     case (int)StaffOptions.AccountDetails:
                         Console.Write("Enter the Bank Id : ");
                         bankId = Console.ReadLine();
@@ -208,7 +209,7 @@ namespace TechnovertAtm.CLI
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                Console.WriteLine(ex);
             }
 
 

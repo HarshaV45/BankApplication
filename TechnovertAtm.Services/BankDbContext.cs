@@ -16,17 +16,17 @@ namespace TechnovertAtm.Services
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseSqlServer(connectionString: "Data Source=.;Initial Catalog=BankApp;Integrated Security=True");
+            optionsBuilder.UseSqlServer("Data Source=LAPTOP-624M6E7F;Initial Catalog=AtmDatabase;Integrated Security=True");
         }
 
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
+       /* protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Bank>(entity =>
             {
                 entity.ToTable("Banks");
                 entity.Property(m => m.BankId);
                 entity.Property(m => m.Name);
-               // entity.Property(m => m.Description);
+                entity.Property(m => m.Description);
 
             });
             modelBuilder.Entity<BankAccount>(entity =>
@@ -61,8 +61,8 @@ namespace TechnovertAtm.Services
             {
                 entity.ToTable("Transactions");
                 entity.Property(m => m.Id);
-                entity.Property(m => m.SourceBankId);
-                entity.Property(m => m.SourceAccountId);
+                entity.Property(m => m.BankId);
+                entity.Property(m => m.AccountId);
                 entity.Property(m => m.Amount);
                 entity.Property(m => m.Tax);
                 entity.Property(m => m.TaxType);
@@ -71,6 +71,6 @@ namespace TechnovertAtm.Services
                 entity.Property(m => m.On);
             });
 
-        }
+        }*/
     }
 }

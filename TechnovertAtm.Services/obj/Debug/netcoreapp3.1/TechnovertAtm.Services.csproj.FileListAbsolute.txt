@@ -11,3 +11,6 @@ C:\Users\91799\source\repos\TechnovertAtm.Services\obj\Debug\netcoreapp3.1\Techn
 C:\Users\91799\source\repos\TechnovertAtm.Services\obj\Debug\netcoreapp3.1\TechnovertAtm.Services.csproj.CopyComplete
 C:\Users\91799\source\repos\TechnovertAtm.Services\obj\Debug\netcoreapp3.1\TechnovertAtm.Services.dll
 C:\Users\91799\source\repos\TechnovertAtm.Services\obj\Debug\netcoreapp3.1\TechnovertAtm.Services.pdb
+C:\Users\91799\source\repos\TechnovertAtm.Services\bin\Debug\netcoreapp3.1\TechnovertAtm.Services.runtimeconfig.json
+C:\Users\91799\source\repos\TechnovertAtm.Services\bin\Debug\netcoreapp3.1\TechnovertAtm.Services.runtimeconfig.dev.json
+C:\Users\91799\source\repos\TechnovertAtm.Services\obj\Debug\netcoreapp3.1\TechnovertAtm.Services.genruntimeconfig.cache

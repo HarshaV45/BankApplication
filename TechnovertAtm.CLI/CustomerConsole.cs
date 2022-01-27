@@ -98,12 +98,14 @@ namespace TechnovertAtm.CLI
 
                             Console.WriteLine("Available Tax Charges for Transaction are : ");
                             Console.WriteLine("\n1. IMPS\n2. RTGS");
+
                             Console.Write("\nEnter the Tax Type in which you would like to transfer the money : ");
-                            string tax = Console.ReadLine();
-                            TaxType taxType = (TaxType)Convert.ToInt32(tax);
+                           
+                            string UserTaxType = Console.ReadLine();
+                            
                             try
                             {
-                                transactionService.Transfer(bankId, accountId, transfered_money, DestinationBankId, DestinationAccountId, taxType);
+                                transactionService.Transfer(bankId, accountId,transfered_money,DestinationBankId,DestinationAccountId,UserTaxType );
 
                                 Console.WriteLine("Amount sucessfully Transfered to destination Account ");
 
@@ -118,11 +120,11 @@ namespace TechnovertAtm.CLI
                             {
                                 List<Transaction> transactions = transactionService.TransactionLog(bankId, accountId);
                                 Console.WriteLine("Transaction Log");
-                                foreach(var transaction in transactions)
+                                foreach (var transaction in transactions)
                                 {
-                                    Console.WriteLine(transaction.Id+"  "+transaction.Amount+"  "+transaction.Type+"  "+transaction.On);
+                                    Console.WriteLine(transaction.Id + "  " + transaction.Amount + "  " + transaction.Type + "  " + transaction.On);
                                 }
-                                
+
                             }
                             catch (Exception ex)
                             {

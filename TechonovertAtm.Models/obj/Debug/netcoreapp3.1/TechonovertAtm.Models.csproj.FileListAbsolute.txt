@@ -8,3 +8,6 @@ C:\Users\91799\source\repos\TechonovertAtm.Models\obj\Debug\netcoreapp3.1\Techon
 C:\Users\91799\source\repos\TechonovertAtm.Models\obj\Debug\netcoreapp3.1\TechonovertAtm.Models.csproj.CoreCompileInputs.cache
 C:\Users\91799\source\repos\TechonovertAtm.Models\obj\Debug\netcoreapp3.1\TechonovertAtm.Models.dll
 C:\Users\91799\source\repos\TechonovertAtm.Models\obj\Debug\netcoreapp3.1\TechonovertAtm.Models.pdb
+C:\Users\91799\source\repos\TechonovertAtm.Models\bin\Debug\netcoreapp3.1\TechonovertAtm.Models.runtimeconfig.json
+C:\Users\91799\source\repos\TechonovertAtm.Models\bin\Debug\netcoreapp3.1\TechonovertAtm.Models.runtimeconfig.dev.json
+C:\Users\91799\source\repos\TechonovertAtm.Models\obj\Debug\netcoreapp3.1\TechonovertAtm.Models.genruntimeconfig.cache

@@ -14,20 +14,23 @@ namespace TechnovertAtm.Services
         //private Data data;
         private CurrencyExchanger currencyExchanger;
         DateTime PresentDate = DateTime.Today;
-        private BankDbContext DbContext = new BankDbContext();
+        private BankDbContext DbContext;
        // public int limit = 50000;
 
         Random random = new Random();
-        public TransactionService(Data data,CustomerService customer,CurrencyExchanger currencyExchanger)
+        public TransactionService(BankDbContext dbContext,CustomerService customer,CurrencyExchanger currencyExchanger)
 
         {
-            
+            this.DbContext = dbContext; 
             this.currencyExchanger = currencyExchanger;
             this.customerService = customer;
         }
+
+        
+    
         public string TransactionIdGenerator(string bankId, string accountId)
         {
-            return "TXN" + bankId + accountId + PresentDate.ToString("dd") + PresentDate.ToString("MM") + PresentDate.ToString("yyyy")+random.Next(1000,9999);
+        return "TXN" + bankId + accountId + PresentDate.ToString("dd") + PresentDate.ToString("MM") + PresentDate.ToString("yyyy") + PresentDate.ToString("hh") + DateTime.Now.ToString("HH") + DateTime.Now.ToString("mm") + DateTime.Now.ToString("ss");
         }
 
 
@@ -43,19 +46,19 @@ namespace TechnovertAtm.Services
             {
                throw new InvalidCurrencyException();
             }
-            amount = currencyExchanger.Converter(amount, currentCurrency.CurrencyExchangeRate);
-            amount = Math.Round(amount, 2);
-            UserInfo.Amount += amount;
+            Decimal newBanlance = currencyExchanger.Converter(amount, currentCurrency.CurrencyExchangeRate);
+            
+            UserInfo.Amount += newBanlance;
             DbContext.BankAccounts.Update(UserInfo);
 
             var newTransaction = new Transaction()
             {
                 Id = TransactionIdGenerator(bankId, accountId),
-                Amount = amount,
-                Type = TransactionType.Credit,
+                Amount = newBanlance,
+                Type = "Credit",
                 On = PresentDate.ToString("g"),
-                SourceBankId=bankId,
-                SourceAccountId=accountId
+                BankId=bankId,
+                AccountId=accountId
               
 
 
@@ -79,15 +82,16 @@ namespace TechnovertAtm.Services
             {
                 throw new AmountNotSufficientException();
             }
-            amount = Math.Round(amount, 2);
+            
             UserInfo.Amount -= amount;
+            DbContext.BankAccounts.Update(UserInfo);
             var newTransaction =new Transaction()
             { 
-                SourceAccountId=accountId,
-                SourceBankId=bankId,
+                AccountId=accountId,
+                BankId=bankId,
                 Id = TransactionIdGenerator(bankId, accountId),
                 Amount = amount,
-                Type = TransactionType.Debit,
+                Type = "Debit",
                 On =PresentDate.ToString("g")
 
 
@@ -97,10 +101,10 @@ namespace TechnovertAtm.Services
             
         }
 
-        public decimal TaxCalculator(string sourceBankId,string destinationBankId,decimal amount,TaxType taxType)
+        public decimal TaxCalculator(string sourceBankId,string destinationBankId,decimal amount,string taxType)
         {
             decimal tax = 0;
-            if(taxType==TaxType.IMPS)
+            if(taxType=="IMPS")
             {
                 if(sourceBankId==destinationBankId)
                 {
@@ -126,19 +130,22 @@ namespace TechnovertAtm.Services
             return tax / 100;
         }
 
-        public void Transfer(string sourceBankId, string sourceAccountId, decimal amount, string destinationBankId, string destinationAccountId,TaxType taxType)
+        public void Transfer(string userBankId, string userAccountId, decimal amount, string destinationBankId, string destinationAccountId,string taxType)
 
         {
-        
-           // BankAccount sourceAccount = this.customerService.AccountChecker(sourceBankId, sourceAccountId);
-           // BankAccount destinationAccount = this.customerService.AccountChecker(destinationBankId, destinationAccountId);
+            if (userBankId == destinationBankId && userAccountId == destinationAccountId)
+            {
+                throw new Exception("Self Transfer is not Allowed!");
+            }
+
+           
             amount = Math.Round(amount, 2);
-            decimal tax = TaxCalculator(sourceBankId, destinationBankId, amount, taxType);
+            decimal tax = TaxCalculator(userBankId, destinationBankId, amount, taxType);
             tax = Math.Round(tax, 2);
 
 
 
-            var UserInfo = DbContext.BankAccounts.SingleOrDefault(m => m.AccountId == sourceAccountId && m.BankId == sourceBankId);
+            var UserInfo = DbContext.BankAccounts.SingleOrDefault(m => m.AccountId == userAccountId && m.BankId == userBankId);
 
 
             if (UserInfo ==null )
@@ -157,48 +164,57 @@ namespace TechnovertAtm.Services
 
             var userTransaction =new Transaction()
             {
-                Id = TransactionIdGenerator(sourceBankId, sourceAccountId),
+                Id = TransactionIdGenerator(userBankId, userAccountId),
                 Amount = amount,
-                Type = TransactionType.Debit,
+                Type =  "Debit",
                 On=PresentDate.ToString("g"),
                 Tax=tax,
                 TaxType=taxType,
-                SourceBankId=sourceBankId,
-                SourceAccountId=sourceBankId,
+                BankId=userBankId,
+                AccountId=userBankId,
                 DestinationBankId=destinationBankId,
                 DestinationAccountId=destinationAccountId
 
             };
+            DbContext.Transactions.Add(userTransaction);
            
             var beneTXN =new Transaction()
             {
                 Id = TransactionIdGenerator(destinationBankId, destinationAccountId),
                 Amount = amount,
-                Type = TransactionType.Credit,
+                Type = "Credit" ,
                 On = PresentDate.ToString("g"),
                 Tax = tax,
                 TaxType=taxType,
-                SourceBankId = sourceBankId,
-                SourceAccountId = sourceBankId,
+                BankId = userBankId,
+                AccountId = userBankId,
                 DestinationBankId = destinationBankId,
                 DestinationAccountId = destinationAccountId
 
             };
+            DbContext.Transactions.Add(beneTXN);
+            DbContext.SaveChanges();
             
         }
 
-        public List<List<string>> TransactionLog(string bankId, string accountId)
+        public List<Transaction> TransactionLog(string bankId, string accountId)
         {
-            var info = DbContext.Transactions.Where(m => m.Id == "TXN1").Select(c => new { c.Id, c.SourceBankId, c.SourceAccountId, c.Amount, c.Tax,  c.TaxType, c.DestinationBankId, c.DestinationAccountId }).ToList();
-            List<List<string>> transactions = new List<List<string>>();
-            foreach(var row in info)
+            try
             {
-                List<string> temp = new List<string>();
-                string[] values = { row.Id, row.SourceBankId, row.SourceAccountId, row.Amount.ToString(), row.Tax.ToString(), row.TaxType.ToString(), row.DestinationBankId, row.DestinationAccountId };
-                temp.AddRange(values);
-                transactions.Add(temp);
+                var info = DbContext.Transactions.Where(m => m.BankId == bankId && m.AccountId == accountId).ToList();
+
+                List<Transaction> transactions = new List<Transaction>();
+
+                foreach (var row in info)
+                {
+                    transactions.Add(row);
+                }
+                return transactions;
             }
-            return transactions;
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
         }
 
         public decimal ViewBalance(string bankId,string accountId)
