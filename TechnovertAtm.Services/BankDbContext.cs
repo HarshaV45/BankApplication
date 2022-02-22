@@ -14,12 +14,18 @@ namespace TechnovertAtm.Services
         public DbSet<StaffAccount> Staff { get; set; }
         public DbSet<Transaction> Transactions { get; set; }
 
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        public BankDbContext(DbContextOptions<BankDbContext> options)
+            : base(options)
         {
-            optionsBuilder.UseSqlServer("Data Source=LAPTOP-624M6E7F;Initial Catalog=AtmDatabase;Integrated Security=True");
+
         }
 
-       /* protected override void OnModelCreating(ModelBuilder modelBuilder)
+        /* protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+         {
+             optionsBuilder.UseSqlServer("Data Source=LAPTOP-624M6E7F;Initial Catalog=AtmDatabase;Integrated Security=True");
+         }*/
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Bank>(entity =>
             {
@@ -27,6 +33,7 @@ namespace TechnovertAtm.Services
                 entity.Property(m => m.BankId);
                 entity.Property(m => m.Name);
                 entity.Property(m => m.Description);
+                entity.Property(m => m.BankStatus);
 
             });
             modelBuilder.Entity<BankAccount>(entity =>
@@ -38,7 +45,8 @@ namespace TechnovertAtm.Services
                 entity.Property(m => m.Amount);
                 entity.Property(m => m.BankId);
                 entity.Property(m => m.Gender);
-
+                entity.Property(m => m.AccountStatus);
+                entity.Property(m => m.Role);
             });
 
             modelBuilder.Entity<Currency>(entity =>
@@ -68,9 +76,12 @@ namespace TechnovertAtm.Services
                 entity.Property(m => m.TaxType);
                 entity.Property(m => m.DestinationBankId);
                 entity.Property(m => m.DestinationAccountId);
+                entity.Property(m => m.TransactionType);
                 entity.Property(m => m.On);
             });
 
-        }*/
+
+        }
     }
 }
+ 

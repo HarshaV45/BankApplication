@@ -18,6 +18,10 @@ namespace TechonovertAtm.Models
        // public List<Transaction> Transactions { get; set; }
         public GenderType Gender { get; set; }
         public int Age { get; set; }
+
+
+        public string Role { get; set; }
+        public AccountStatus AccountStatus { get; set; }
         
 
        

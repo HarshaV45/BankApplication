@@ -15,7 +15,7 @@ namespace TechnovertAtm.CLI
             StaffService staffService = new StaffService(DbContext);
             CurrencyExchanger currencyExchanger = new CurrencyExchanger();
             BankServices bankService = new BankServices(DbContext);
-            CustomerService customerService = new CustomerService(DbContext,bankService);
+            AccountServices customerService = new CustomerService(DbContext,bankService);
             TransactionService transactionService = new TransactionService(DbContext, customerService, currencyExchanger);
             try
             {

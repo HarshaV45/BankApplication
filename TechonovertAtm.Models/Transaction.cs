@@ -12,7 +12,6 @@ namespace TechonovertAtm.Models
         public string Id { get; set; }
         
         public decimal Amount { get; set; }
-        public string Type { get; set; }
         public string On { get; set; }
         public string TaxType { get; set; }
         public decimal Tax { get; set; }
@@ -20,5 +19,7 @@ namespace TechonovertAtm.Models
         public string AccountId { get; set; }
         public string DestinationBankId { get; set; }
         public string DestinationAccountId { get; set; }
+
+        public TransactionType TransactionType { get; set; }
     }
 }

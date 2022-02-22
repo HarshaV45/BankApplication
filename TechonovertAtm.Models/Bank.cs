@@ -13,6 +13,9 @@ namespace TechonovertAtm.Models
         public string Name { get; set; }
 
         public string Description { get; set; }
+
+        public  Status BankStatus { get; set; }
+       // public AccountStatus AccountStatus { get; set; }
         //public List<BankAccount> BankAccounts { get; set; }
         
 

@@ -9,7 +9,7 @@ namespace TechnovertAtm.CLI
 {
     public class StaffConsole
     {
-        public void Login(BankServices bankService,CustomerService customerService,StaffService staffService,TransactionService transactionService)
+        public void Login(BankServices bankService,AccountServices customerService,StaffService staffService,TransactionService transactionService)
         {
             try
             {

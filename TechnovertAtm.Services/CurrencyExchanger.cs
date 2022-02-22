@@ -5,16 +5,18 @@ using System.Net.Cache;
 using System.Net;
 using Newtonsoft.Json;
 using TechonovertAtm.Models;
+using TechnovertAtm.Services.Interfaces;
 
 namespace TechnovertAtm.Services
 {
-    public class CurrencyExchanger
+    public class CurrencyExchanger:ICurrencyService
     {
-        
-        public BankDbContext DbContext = new BankDbContext();
-        public CurrencyExchanger()
+
+        private BankDbContext _DbContext;
+        public CurrencyExchanger(BankDbContext DbContext)
         {
-           // CurrencyExchange();
+            _DbContext = DbContext;
+            CurrencyExchange();
         }
         public decimal Converter(decimal amount,decimal exchangeRate)
         {
@@ -46,11 +48,11 @@ namespace TechnovertAtm.Services
                         CurrencyName = currency.Value.name,
                         CurrencyExchangeRate = currency.Value.inverseRate
                     });
-                    DbContext.Curriencies.Add(newCurrency);
+                    _DbContext.Curriencies.Add(newCurrency);
 
                     currencyCounter += 1;
                 }
-                DbContext.SaveChanges();
+                _DbContext.SaveChanges();
                 
              
             }

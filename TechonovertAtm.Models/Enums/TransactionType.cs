@@ -7,6 +7,7 @@ namespace TechonovertAtm.Models.Enums
     public enum TransactionType
     {
         Debit,
-        Credit
+        Credit,
+        Transfer
     }
 }

@@ -2,20 +2,22 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using TechnovertAtm.Services.Interfaces;
 using TechonovertAtm.Models;
 using TechonovertAtm.Models.Exceptions;
+using TechonovertAtm.Models.Enums;
 
 
 namespace TechnovertAtm.Services
 {
-    public class BankServices
+    public class BankServices : IBankService
     {
-       
+
         DateTime PresentDate = DateTime.Today;
-        private BankDbContext DbContext ;
+        private BankDbContext _DbContext;
         public BankServices(BankDbContext dbContext)
         {
-            this.DbContext = dbContext;
+            _DbContext = dbContext;
         }
 
         public string BankIdPattern(string bankName)
@@ -30,35 +32,76 @@ namespace TechnovertAtm.Services
         }
 
 
-        public void BankChecker(string bankId) 
+        public void BankChecker(string bankId)
         {
-            var info = DbContext.Banks.SingleOrDefault(m => m.BankId == bankId);
+            var info = _DbContext.Banks.SingleOrDefault(m => m.BankId == bankId);
             if (info == null)
             {
                 throw new BankNotPresentException();
             }
         }
 
-        public void BankCreation(string bankName,string description)
+        public Bank BankCreation(Bank bank)
         {
-            var newBank = new Bank()
-            {
-                Name = bankName,
-                BankId = bankName+123,
-                Description =description
-               
-            };
             try
             {
-                DbContext.Banks.Add(newBank);
-                DbContext.SaveChanges();
+                bank.BankId = BankIdPattern(bank.Name);
+                var duplicateBank = _DbContext.Banks.FirstOrDefault(m => m.Name == bank.Name && m.Description == bank.Description);
+                if (duplicateBank != null)
+                    throw new Exception("Bank already exists!");
+                _DbContext.Banks.Add(bank);
+                _DbContext.SaveChanges();
+                return bank;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 throw new Exception(ex.Message);
             }
-
         }
-    }
 
+        public Bank GetBank(string bankId)
+        {
+            var bank = _DbContext.Banks.FirstOrDefault(m => m.BankId == bankId);
+            if (bank == null)
+                throw new Exception("Bank Not Found!");
+            if(bank.BankStatus ==Status.Closed)
+                throw new Exception("Bank was Closed!");  
+               
+            return bank;
+        }
+
+        public List<Bank>GetAllBAnks()
+        {
+            return _DbContext.Banks.Where(m => m.BankStatus == Status.Active).ToList();
+        }
+
+        public Bank UpdateBank(Bank bank)
+        {
+            _DbContext.Banks.Attach(bank);
+            _DbContext.SaveChanges();
+            var UpdatedBank = _DbContext.Banks.FirstOrDefault(m => m.BankId == bank.BankId);
+            return UpdatedBank;
+        }
+
+
+        public Bank CloseBank(string bankId)
+        {
+            try
+            {
+                var bankToDelete = _DbContext.Banks.SingleOrDefault(m => m.BankId == bankId);
+                if (bankToDelete == null)
+                    throw new Exception("Invalid Bank Id");
+                if (bankToDelete.BankStatus == Status.Closed)
+                    throw new Exception("Bank Already Closed!");
+                bankToDelete.BankStatus = Status.Closed;
+                _DbContext.SaveChanges();
+                return bankToDelete;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+    }
 }

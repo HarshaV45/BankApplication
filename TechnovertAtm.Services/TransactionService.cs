@@ -2,106 +2,121 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using TechnovertAtm.Services.Interfaces;
 using TechonovertAtm.Models;
 using TechonovertAtm.Models.Enums;
 using TechonovertAtm.Models.Exceptions;
 
 namespace TechnovertAtm.Services
 {
-    public class TransactionService
+    public class TransactionService:ITransactionService
     {
-        private CustomerService customerService;
+        private AccountServices customerService;
         //private Data data;
         private CurrencyExchanger currencyExchanger;
         DateTime PresentDate = DateTime.Today;
-        private BankDbContext DbContext;
+        private BankDbContext _DbContext;
+        private IAccountService accountService;
        // public int limit = 50000;
 
         Random random = new Random();
-        public TransactionService(BankDbContext dbContext,CustomerService customer,CurrencyExchanger currencyExchanger)
+        public TransactionService(BankDbContext dbContext,IAccountService accountService)
 
         {
-            this.DbContext = dbContext; 
-            this.currencyExchanger = currencyExchanger;
-            this.customerService = customer;
+            _DbContext = dbContext;
+            this.accountService = accountService;
         }
 
-        
-    
+        public Transaction GetTransaction(string id)
+        {
+            return _DbContext.Transactions.SingleOrDefault(m => m.Id == id);
+        }
+
+
+        public Transaction AddTransaction(Transaction transaction)
+        {
+            try
+            {
+                _DbContext.Transactions.Add(transaction);
+                _DbContext.SaveChanges();
+                return transaction;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        public Transaction UpdateTransaction(Transaction transaction)
+        {
+            throw new Exception("Not Implemented");
+        }
+
+        public Transaction DeleteTransaction(Transaction transaction)
+        {
+            throw new Exception("Not Implemented");
+        }
+
         public string TransactionIdGenerator(string bankId, string accountId)
         {
         return "TXN" + bankId + accountId + PresentDate.ToString("dd") + PresentDate.ToString("MM") + PresentDate.ToString("yyyy") + PresentDate.ToString("hh") + DateTime.Now.ToString("HH") + DateTime.Now.ToString("mm") + DateTime.Now.ToString("ss");
         }
 
 
-        public void Deposit(string bankId, string accountId, decimal amount,string currencyCode)
+        public Transaction Deposit(string bankId, string accountId, decimal amount)
         {
-            var UserInfo = DbContext.BankAccounts.SingleOrDefault(m => m.AccountId == accountId && m.BankId == bankId);
-            var currentCurrency = DbContext.Curriencies.SingleOrDefault(x => x.CurrencyCode == currencyCode);
-            if (UserInfo == null)
+            try
             {
-                throw new InvalidUserException();
+                var info = accountService.GetAccount(bankId, accountId);
+                info.Amount += amount;
+
+                var newTransaction = new Transaction();
+                newTransaction.Id = Guid.NewGuid().ToString();
+                newTransaction.BankId = bankId;
+                newTransaction.AccountId = accountId;
+                newTransaction.Amount = amount;
+                newTransaction.On = PresentDate.ToString();
+                newTransaction.TransactionType = TransactionType.Credit;
+
+                AddTransaction(newTransaction);
+                return newTransaction;
             }
-            if(currentCurrency==null)
+            catch (Exception ex)
             {
-               throw new InvalidCurrencyException();
+                throw new Exception(ex.Message);
             }
-            Decimal newBanlance = currencyExchanger.Converter(amount, currentCurrency.CurrencyExchangeRate);
-            
-            UserInfo.Amount += newBanlance;
-            DbContext.BankAccounts.Update(UserInfo);
+        }
 
-            var newTransaction = new Transaction()
+        public Transaction Withdraw(string bankId, string accountId, decimal amount)
+        {
+            try
             {
-                Id = TransactionIdGenerator(bankId, accountId),
-                Amount = newBanlance,
-                Type = "Credit",
-                On = PresentDate.ToString("g"),
-                BankId=bankId,
-                AccountId=accountId
-              
+                var info = accountService.GetAccount(bankId, accountId);
+                if (info.Amount <= amount)
+                    throw new Exception("Insufficient funds");
 
+                info.Amount -= amount;
 
-            };
-            DbContext.Transactions.Add(newTransaction);
-            DbContext.SaveChanges();
-            
+                var newTransaction = new Transaction();
+                newTransaction.Id = Guid.NewGuid().ToString();
+                newTransaction.BankId = bankId;
+                newTransaction.AccountId = accountId;
+                newTransaction.Amount = amount;
+                newTransaction.On = PresentDate.ToString();
+                newTransaction.TransactionType = TransactionType.Debit;
+
+                AddTransaction(newTransaction);
+                return newTransaction;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
         }
 
 
 
-        public void Withdraw(string bankId, string accountId, decimal amount)
-        {
-            var UserInfo = DbContext.BankAccounts.SingleOrDefault(m => m.AccountId == accountId && m.BankId == bankId);
-
-            if (UserInfo == null)
-            {
-                throw new InvalidUserException();
-            }
-            if (UserInfo.Amount < amount)
-            {
-                throw new AmountNotSufficientException();
-            }
-            
-            UserInfo.Amount -= amount;
-            DbContext.BankAccounts.Update(UserInfo);
-            var newTransaction =new Transaction()
-            { 
-                AccountId=accountId,
-                BankId=bankId,
-                Id = TransactionIdGenerator(bankId, accountId),
-                Amount = amount,
-                Type = "Debit",
-                On =PresentDate.ToString("g")
-
-
-            };
-            DbContext.Transactions.Add(newTransaction);
-            DbContext.SaveChanges();
-            
-        }
-
-        public decimal TaxCalculator(string sourceBankId,string destinationBankId,decimal amount,string taxType)
+            public decimal TaxCalculator(string sourceBankId,string destinationBankId,decimal amount,string taxType)
         {
             decimal tax = 0;
             if(taxType=="IMPS")
@@ -145,7 +160,7 @@ namespace TechnovertAtm.Services
 
 
 
-            var UserInfo = DbContext.BankAccounts.SingleOrDefault(m => m.AccountId == userAccountId && m.BankId == userBankId);
+            var UserInfo = _DbContext.BankAccounts.SingleOrDefault(m => m.AccountId == userAccountId && m.BankId == userBankId);
 
 
             if (UserInfo ==null )
@@ -157,7 +172,7 @@ namespace TechnovertAtm.Services
             {
                 throw new AmountNotSufficientException();
             }
-            var beneInfo = DbContext.BankAccounts.SingleOrDefault(m => m.AccountId == destinationAccountId && m.BankId == destinationBankId);
+            var beneInfo = _DbContext.BankAccounts.SingleOrDefault(m => m.AccountId == destinationAccountId && m.BankId == destinationBankId);
 
             UserInfo.Amount -= amount+tax;
             beneInfo.Amount += amount;
@@ -166,7 +181,7 @@ namespace TechnovertAtm.Services
             {
                 Id = TransactionIdGenerator(userBankId, userAccountId),
                 Amount = amount,
-                Type =  "Debit",
+                TransactionType =  TransactionType.Debit,
                 On=PresentDate.ToString("g"),
                 Tax=tax,
                 TaxType=taxType,
@@ -176,13 +191,13 @@ namespace TechnovertAtm.Services
                 DestinationAccountId=destinationAccountId
 
             };
-            DbContext.Transactions.Add(userTransaction);
+            _DbContext.Transactions.Add(userTransaction);
            
             var beneTXN =new Transaction()
             {
                 Id = TransactionIdGenerator(destinationBankId, destinationAccountId),
                 Amount = amount,
-                Type = "Credit" ,
+                TransactionType = TransactionType.Credit ,
                 On = PresentDate.ToString("g"),
                 Tax = tax,
                 TaxType=taxType,
@@ -192,16 +207,30 @@ namespace TechnovertAtm.Services
                 DestinationAccountId = destinationAccountId
 
             };
-            DbContext.Transactions.Add(beneTXN);
-            DbContext.SaveChanges();
+            _DbContext.Transactions.Add(beneTXN);
+            _DbContext.SaveChanges();
             
+        }
+
+        public List<Transaction> GetAllTransactions(string bankId, string accountId)
+        {
+            try
+            {
+                var info = _DbContext.Transactions.Where(m => (m.BankId == bankId && m.AccountId == accountId) || (m.DestinationBankId == bankId && m.DestinationAccountId == accountId)).ToList();
+
+                return info;
+            }
+            catch
+            {
+                throw new Exception("No Available Transactions");
+            }
         }
 
         public List<Transaction> TransactionLog(string bankId, string accountId)
         {
             try
             {
-                var info = DbContext.Transactions.Where(m => m.BankId == bankId && m.AccountId == accountId).ToList();
+                var info = _DbContext.Transactions.Where(m => m.BankId == bankId && m.AccountId == accountId).ToList();
 
                 List<Transaction> transactions = new List<Transaction>();
 
@@ -219,7 +248,7 @@ namespace TechnovertAtm.Services
 
         public decimal ViewBalance(string bankId,string accountId)
         {
-            var info = DbContext.BankAccounts.SingleOrDefault(m => m.AccountId == accountId && m.BankId == bankId);
+            var info = _DbContext.BankAccounts.SingleOrDefault(m => m.AccountId == accountId && m.BankId == bankId);
             if(info==null)
             {
                 throw new InvalidCustomerNameException();
