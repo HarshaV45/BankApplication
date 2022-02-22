@@ -20,6 +20,7 @@ namespace Technovert.WebApi.AutoMapper
             CreateMap<BankAccount, PostAccountDTO>().ReverseMap();
             CreateMap<DeleteAccountDTO, BankAccount>().ReverseMap();
             CreateMap<BalanceDTO, BankAccount>().ReverseMap();
+            CreateMap<PutAccountDTO, BankAccount>().ReverseMap();
             CreateMap<BankDTO, Bank>().ReverseMap();
             CreateMap<CreateTransactionDTO, Transaction>().ReverseMap();
             CreateMap<GetTransactionDTO, Transaction>().ReverseMap();

@@ -12,7 +12,7 @@ using System.Text;
 using Technovert.WebApi.AutoMapper;
 using TechnovertAtm.Services;
 using TechnovertAtm.Services.Interfaces;
-using Microsoft.AspNetCore;
+
 
 namespace Technovert.WebApi
 {
@@ -24,7 +24,6 @@ namespace Technovert.WebApi
         }
 
         public IConfiguration Configuration { get; }
-
         public object JwtBearerDefaults { get; private set; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
@@ -70,18 +69,18 @@ namespace Technovert.WebApi
             services.AddScoped<ICurrencyService, CurrencyExchanger>();
             services.AddScoped<ITransactionService, TransactionService>();
 
-            //services.AddControllers();
-            //object p = services.AddAuthentication(Microsoft.AspNetCore.JwtBearer.JwtBearerDefaults.AuthenticationScheme)
-            //    .AddJwtBearer(options =>
-            //    {
-            //        options.TokenValidationParameters = new TokenValidationParameters
-            //        {
-            //            ValidateIssuerSigningKey = true,
-            //            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration.GetSection("AppSettings:Token").Value)),
-            //            ValidateIssuer = false,
-            //            ValidateAudience = false
-            //        };
-            //    });
+            services.AddControllers();
+            services.AddAuthentication(Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerDefaults.AuthenticationScheme)
+                .AddJwtBearer(options =>
+                {
+                    options.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidateIssuerSigningKey = true,
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration.GetSection("AppSettings:Token").Value)),
+                        ValidateIssuer = false,
+                        ValidateAudience = false
+                    };
+                });
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "BankApp.api", Version = "v1" });
@@ -93,7 +92,41 @@ namespace Technovert.WebApi
                 });
                 c.OperationFilter<SecurityRequirementsOperationFilter>();
             });
-           
+            /*services.AddSwaggerGen(swagger =>
+            {
+                //This is to generate the Default UI of Swagger Documentation    
+                swagger.SwaggerDoc("v1", new OpenApiInfo
+                {
+                    Version = "v1",
+                    Title = "ASP.NET 5 Web API",
+                    Description = "Bank API"
+                });
+                // To Enable authorization using Swagger (JWT)    
+                swagger.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme()
+                {
+                    Name = "Authorization",
+                    Type = SecuritySchemeType.ApiKey,
+                    Scheme = "Bearer",
+                    BearerFormat = "JWT",
+                    In = ParameterLocation.Header,
+                    Description = "Enter 'Bearer' [space] and then your valid token in the text input below.\r\n\r\nExample: \"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9\"",
+                });
+                swagger.AddSecurityRequirement(new OpenApiSecurityRequirement
+                {
+                    {
+                          new OpenApiSecurityScheme
+                            {
+                                Reference = new OpenApiReference
+                                {
+                                    Type = ReferenceType.SecurityScheme,
+                                    Id = "Bearer"
+                                }
+                            },
+                            new string[] {}
+                    }
+                });
+            });*/
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -125,4 +158,3 @@ namespace Technovert.WebApi
         }
     }
 }
-

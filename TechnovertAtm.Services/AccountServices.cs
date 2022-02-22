@@ -26,18 +26,19 @@ namespace TechnovertAtm.Services
 
 
         private readonly AppSettings _appSettings;
-        public AccountServices(BankDbContext dbContext,IOptions<AppSettings> appSettings)
+        public AccountServices(BankDbContext dbContext,IOptions<AppSettings> appSettings,IConfiguration configuration)
         {
             _DbContext = dbContext;
             _appSettings = appSettings.Value;
-           
+            this.configuration = configuration;
+
         }
 
         public string Authenticate(string bankId, string id, string password)
         {
             try
             {
-                var info = _DbContext.BankAccounts.SingleOrDefault(m => m.AccountId == id && m.BankId == bankId);
+                var info = _DbContext.Staff.SingleOrDefault(m => m.Id == id );
                 if (info == null)
                     return null;
                 
@@ -49,8 +50,8 @@ namespace TechnovertAtm.Services
                 {
                     Subject = new ClaimsIdentity(new Claim[]
                     {
-                        new Claim(ClaimTypes.Name, info.AccountId),
-                        new Claim(ClaimTypes.Role, info.Role)
+                        new Claim(ClaimTypes.Name, info.Id),
+                        new Claim(ClaimTypes.Role,"Staff")
                     }),
                     Expires = DateTime.Now.AddHours(1),
                     SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)

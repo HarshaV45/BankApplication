@@ -1,5 +1,6 @@
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
@@ -72,8 +73,8 @@ namespace Technovert.WebApi.Controllers
                 return BadRequest(ex.Message);
             }
         }
-
-        [Authorize(Roles = "Staff")]
+        [AllowAnonymous]
+       // [Authorize(Roles = "Staff")]
         [HttpPost("{bankId}")]
         public IActionResult Post(string bankId, PostAccountDTO newAccountDTO)
         {
@@ -97,7 +98,7 @@ namespace Technovert.WebApi.Controllers
 
         }
 
-        [Authorize(Roles = "Staff")]
+       [Authorize(Roles = "Staff")]
         [HttpPut("{bankId}/{id}")]
         public IActionResult Put(string bankId, string id, PutAccountDTO accountDTO)
         {

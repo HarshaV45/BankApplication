@@ -75,7 +75,7 @@ namespace TechnovertAtm.Services
                 newTransaction.BankId = bankId;
                 newTransaction.AccountId = accountId;
                 newTransaction.Amount = amount;
-                newTransaction.On = PresentDate.ToString();
+                newTransaction.OnDate = PresentDate.ToString();
                 newTransaction.TransactionType = TransactionType.Credit;
 
                 AddTransaction(newTransaction);
@@ -102,7 +102,7 @@ namespace TechnovertAtm.Services
                 newTransaction.BankId = bankId;
                 newTransaction.AccountId = accountId;
                 newTransaction.Amount = amount;
-                newTransaction.On = PresentDate.ToString();
+                newTransaction.OnDate = PresentDate.ToString();
                 newTransaction.TransactionType = TransactionType.Debit;
 
                 AddTransaction(newTransaction);
@@ -182,7 +182,7 @@ namespace TechnovertAtm.Services
                 Id = TransactionIdGenerator(userBankId, userAccountId),
                 Amount = amount,
                 TransactionType =  TransactionType.Debit,
-                On=PresentDate.ToString("g"),
+                OnDate=PresentDate.ToString("g"),
                 Tax=tax,
                 TaxType=taxType,
                 BankId=userBankId,
@@ -198,7 +198,7 @@ namespace TechnovertAtm.Services
                 Id = TransactionIdGenerator(destinationBankId, destinationAccountId),
                 Amount = amount,
                 TransactionType = TransactionType.Credit ,
-                On = PresentDate.ToString("g"),
+                OnDate = PresentDate.ToString("g"),
                 Tax = tax,
                 TaxType=taxType,
                 BankId = userBankId,

@@ -15,7 +15,7 @@ namespace Technovert.WebApi.DTOs.TransactionDTOs
         public decimal Amount { get; set; }
         public decimal TaxAmount { get; set; }
         public string TaxType { get; set; }
-        public DateTime On { get; set; }
+        public DateTime OnDate { get; set; }
         public TransactionType TransactionType { get; set; }
     }
 }

@@ -70,7 +70,7 @@ namespace TechnovertAtm.Services
             return bank;
         }
 
-        public List<Bank>GetAllBAnks()
+        public List<Bank> GetAllBAnks()
         {
             return _DbContext.Banks.Where(m => m.BankStatus == Status.Active).ToList();
         }

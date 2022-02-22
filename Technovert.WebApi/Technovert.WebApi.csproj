@@ -8,7 +8,7 @@
     <PackageReference Include="AutoMapper" Version="11.0.1" />
     <PackageReference Include="Intercom.Dotnet.Client" Version="2.1.1" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication" Version="2.2.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="3.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="3.1.9" />
     <PackageReference Include="Microsoft.AspNetCore.Identity" Version="2.2.0" />
     <PackageReference Include="Microsoft.VisualStudio.Services.Client" Version="16.170.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="5.6.3" />
@@ -16,6 +16,8 @@
     <PackageReference Include="Swashbuckle.AspNetCore.Filters" Version="7.0.2" />
 	 
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.16.0" />
+	 
+    <PackageReference Include="System.Text.Encoding.Extensions" Version="4.3.0" />
   </ItemGroup>
 
   <ItemGroup>

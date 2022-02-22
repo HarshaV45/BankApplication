@@ -44,7 +44,7 @@ namespace Technovert.WebApi.Controllers
             return Ok(bankService.BankCreation(newBank));
         }
 
-        [Authorize(Roles = "Staff")]
+       [Authorize(Roles = "Staff")]
         [HttpDelete("{id}")]
         public IActionResult Delete(string id)
         {

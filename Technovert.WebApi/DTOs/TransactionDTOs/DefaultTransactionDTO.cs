@@ -9,7 +9,7 @@ namespace Technovert.WebApi.DTOs.TransactionDTOs
         public string BankId { get; set; }
         public string AccountId { get; set; }
         public decimal Amount { get; set; }
-        public DateTime On{ get; set; }
+        public DateTime OnDate{ get; set; }
         public TransactionType TransactionType { get; set; }
     }
 }

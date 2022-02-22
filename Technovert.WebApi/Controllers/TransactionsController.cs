@@ -107,8 +107,8 @@ namespace Technovert.BankApp.WebApi.Controllers
                 newTransaction.DestinationAccountId = transactionDTO.DestinationAccountId;
                 newTransaction.Amount = transactionDTO.Amount;
                 newTransaction.Tax = tax;
-               // newTransaction.TaxType = transactionDTO.TaxType;
-               // newTransaction.On = (DateTime.Now);
+                newTransaction.TaxType = transactionDTO.TaxType.ToString();
+                newTransaction.OnDate = DateTime.Now.ToString();
                 newTransaction.TransactionType = TransactionType.Transfer;
 
                 transactionService.AddTransaction(newTransaction);
@@ -135,7 +135,7 @@ namespace Technovert.BankApp.WebApi.Controllers
             }
         }
 
-        [Authorize(Roles = "User")]
+       [Authorize(Roles = "User")]
         [HttpPut("Withdraw/{bankId}/{accountId}")]
         public IActionResult Withdraw(string bankId, string accountId, decimal amount)
         {

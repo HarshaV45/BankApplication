@@ -77,7 +77,7 @@ namespace TechnovertAtm.Services
                 entity.Property(m => m.DestinationBankId);
                 entity.Property(m => m.DestinationAccountId);
                 entity.Property(m => m.TransactionType);
-                entity.Property(m => m.On);
+                entity.Property(m => m.OnDate);
             });
 
 
